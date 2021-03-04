@@ -67,7 +67,7 @@
             ]
         },
         "entry_state": "RUNNING",
-        "exit_state": "CONFIGURED",
+        "exit_state": "INITIAL",
         "id": "stop"
     }
 ]

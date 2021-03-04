@@ -48,3 +48,5 @@ namespace dunedaq {
         }
     }
 }
+
+DEFINE_DUNE_DAQ_MODULE(dunedaq::daqmoduletest::Consumer)
