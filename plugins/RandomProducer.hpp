@@ -8,8 +8,10 @@
 #include "appfwk/DAQModule.hpp"
 #include "appfwk/DAQSink.hpp"
 #include "appfwk/ThreadHelper.hpp"
+#include "appfwk/app/Nljs.hpp"
 
 #include <atomic>
+#include <random>
 
 namespace dunedaq {
     namespace daqmoduletest {
@@ -35,6 +37,8 @@ namespace dunedaq {
 
         using sink_t = dunedaq::appfwk::DAQSink<int>;
         std::unique_ptr<sink_t> outputQueue;
+
+        std::mt19937 mt_rand;
     };
     }
 }
