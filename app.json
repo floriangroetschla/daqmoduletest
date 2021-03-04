@@ -1,0 +1,73 @@
+[
+    {
+        "data": {
+            "modules": [
+                {
+                    "data": {
+                        "qinfos": [
+                            {
+                                "dir": "output",
+                                "inst": "orig1",
+                                "name": "q1"
+                            }
+                        ]
+                    },
+                    "inst": "rdlg",
+                    "plugin": "RandomProducer"
+                },
+                {
+                    "data": {
+                        "qinfos": [
+                            {
+                                "dir": "input",
+                                "inst": "orig1",
+                                "name": "input"
+                            }
+                        ]
+                    },
+                    "inst": "lr",
+                    "plugin": "Consumer"
+                }
+            ],
+            "queues": [
+                {
+                    "capacity": 100,
+                    "inst": "orig1",
+                    "kind": "FollySPSCQueue"
+                }
+            ]
+        },
+        "entry_state": "NONE",
+        "exit_state": "INITIAL",
+        "id": "init"
+    },
+    {
+        "data": {
+            "modules": [
+                {
+                    "data": {
+                        "disable_data_storage": false,
+                        "run": 333,
+                        "trigger_interval_ticks": 64000000
+                    },
+                    "match": ".*"
+                }
+            ]
+        },
+        "entry_state": "INITIAL",
+        "exit_state": "RUNNING",
+        "id": "start"
+    },
+    {
+        "data": {
+            "modules": [
+                {
+                    "match": ".*"
+                }
+            ]
+        },
+        "entry_state": "RUNNING",
+        "exit_state": "CONFIGURED",
+        "id": "stop"
+    }
+]

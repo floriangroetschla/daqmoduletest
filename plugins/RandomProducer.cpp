@@ -28,15 +28,15 @@ namespace dunedaq {
             }
         }
 
-        void RandomProducer::get_info(opmonlib::InfoCollector& ci, int level) {
+        void RandomProducer::get_info(opmonlib::InfoCollector& /*ci*/, int /*level*/) {
 
         }
 
-        void RandomProducer::do_start(const nlohmann::json& args) {
+        void RandomProducer::do_start(const nlohmann::json& /*args*/) {
             thread_.start_working_thread();
         }
 
-        void RandomProducer::do_stop(const nlohmann::json& args) {
+        void RandomProducer::do_stop(const nlohmann::json& /*args*/) {
             thread_.stop_working_thread();
         }
 

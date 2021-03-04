@@ -22,15 +22,15 @@ namespace dunedaq {
             }
         }
 
-        void Consumer::get_info(opmonlib::InfoCollector& ci, int level) {
+        void Consumer::get_info(opmonlib::InfoCollector& /*ci*/, int /*level*/) {
 
         }
 
-        void Consumer::do_start(const nlohmann::json& args) {
+        void Consumer::do_start(const nlohmann::json& /*args*/) {
             thread_.start_working_thread();
         }
 
-        void Consumer::do_stop(const nlohmann::json& args) {
+        void Consumer::do_stop(const nlohmann::json& /*args*/) {
             thread_.stop_working_thread();
         }
 
