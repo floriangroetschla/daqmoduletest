@@ -8,6 +8,7 @@
 #include "appfwk/DAQModule.hpp"
 #include "appfwk/DAQSource.hpp"
 #include "appfwk/ThreadHelper.hpp"
+#include "Message.hpp"
 
 #include <atomic>
 
@@ -33,8 +34,10 @@ namespace dunedaq {
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);
 
-        using source_t = dunedaq::appfwk::DAQSource<int>;
+        using source_t = dunedaq::appfwk::DAQSource<Message>;
         std::unique_ptr<source_t> inputQueue;
+
+        Message message_buffer;
     };
     }
 }

@@ -39,13 +39,16 @@ namespace dunedaq {
 
         void RandomProducer::do_work(std::atomic<bool>& running_flag) {
             while (running_flag.load()) {
-                int r = mt_rand();
+                for (uint i = 0; i < NUMBER_OF_BUFFER_ELEMENTS; ++i) {
+                    message_buffer.buffer[i] = mt_rand();
+                }
                 try {
-                    outputQueue->push(r, std::chrono::milliseconds(100));
+                    outputQueue->push(message_buffer, std::chrono::milliseconds(100));
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     std::cout << "Could not push to queue" << std::endl;
                 }
-                std::cout << "Pushed random number " << r << std::endl;
+                std::cout << "Pushed message" << std::endl;
+                //std::cout << "Pushed random sequence " << message_buffer << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
         }

@@ -36,10 +36,10 @@ namespace dunedaq {
 
         void Consumer::do_work(std::atomic<bool>& running_flag) {
             while (running_flag.load()) {
-                int r;
                 try {
-                    inputQueue->pop(r, std::chrono::milliseconds(100));
-                    std::cout << "Received random number " << r << std::endl;
+                    inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
+                    std::cout << "Received message" << std::endl;
+                    //std::cout << "Received random sequence " << message_buffer << std::endl;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     continue;
                 }
