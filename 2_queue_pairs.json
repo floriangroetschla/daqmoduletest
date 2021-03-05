@@ -1,0 +1,106 @@
+[
+  {
+    "data": {
+      "modules": [
+        {
+          "data": {
+            "qinfos": [
+              {
+                "dir": "output",
+                "inst": "queue1",
+                "name": "outputQueue"
+              }
+            ]
+          },
+          "inst": "rp1",
+          "plugin": "RandomProducer"
+        },
+        {
+          "data": {
+            "qinfos": [
+              {
+                "dir": "input",
+                "inst": "queue1",
+                "name": "inputQueue"
+              }
+            ],
+            "output_file": "output1"
+          },
+          "inst": "c1",
+          "plugin": "Consumer"
+        },
+        {
+          "data": {
+            "qinfos": [
+              {
+                "dir": "output",
+                "inst": "queue2",
+                "name": "outputQueue"
+              }
+            ]
+          },
+          "inst": "rp2",
+          "plugin": "RandomProducer"
+        },
+        {
+          "data": {
+            "qinfos": [
+              {
+                "dir": "input",
+                "inst": "queue2",
+                "name": "inputQueue"
+              }
+            ],
+            "output_file": "output2"
+          },
+          "inst": "c2",
+          "plugin": "Consumer"
+        }
+      ],
+      "queues": [
+        {
+          "capacity": 100,
+          "inst": "queue1",
+          "kind": "FollySPSCQueue"
+        },
+        {
+          "capacity": 100,
+          "inst": "queue2",
+          "kind": "FollySPSCQueue"
+        }
+      ]
+    },
+    "entry_state": "NONE",
+    "exit_state": "INITIAL",
+    "id": "init"
+  },
+  {
+    "data": {
+      "modules": [
+        {
+          "data": {
+            "disable_data_storage": false,
+            "run": 333,
+            "trigger_interval_ticks": 64000000
+          },
+          "match": ".*"
+        }
+      ]
+    },
+    "entry_state": "INITIAL",
+    "exit_state": "RUNNING",
+    "id": "start"
+  },
+  {
+    "data": {
+      "modules": [
+        {
+          "match": ".*"
+        }
+      ]
+    },
+    "entry_state": "RUNNING",
+    "exit_state": "INITIAL",
+    "id": "stop"
+  }
+]

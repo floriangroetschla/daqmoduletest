@@ -43,6 +43,7 @@ namespace dunedaq {
         std::atomic<uint64_t> m_bytes_received{0};
         std::atomic<uint64_t> m_bytes_written{0};
         std::ofstream m_output_stream;
+        std::string m_output_file;
     };
     }
 }

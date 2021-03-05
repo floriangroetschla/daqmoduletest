@@ -14,7 +14,6 @@ namespace dunedaq {
             uint32_t buffer[NUMBER_OF_BUFFER_ELEMENTS];
         };
 
-        // For debugging purposes
         std::ostream& operator<<(std::ostream& os, const Message& message) {
             for (uint i = 0; i < NUMBER_OF_BUFFER_ELEMENTS; ++i) {
                 os << message.buffer[i] << " ";

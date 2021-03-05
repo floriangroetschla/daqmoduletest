@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#define MAXIMUM_BYTES_TO_SEND ((uint64_t) 1 << 32)
+
 namespace dunedaq {
     namespace daqmoduletest {
 
@@ -20,8 +22,8 @@ namespace dunedaq {
 
         void RandomProducer::init(const nlohmann::json& init_data) {
             try {
-                auto qi = appfwk::queue_index(init_data, {"q1"});
-                outputQueue.reset(new sink_t(qi["q1"].inst));
+                auto qi = appfwk::queue_index(init_data, {"outputQueue"});
+                outputQueue.reset(new sink_t(qi["outputQueue"].inst));
             } catch (const ers::Issue& excpt) {
                 TLOG() << "Could not initialize queue" << std::endl;
             }
@@ -45,7 +47,7 @@ namespace dunedaq {
         }
 
         void RandomProducer::do_work(std::atomic<bool>& running_flag) {
-            while (running_flag.load()) {
+            while ((m_bytes_sent < MAXIMUM_BYTES_TO_SEND) && running_flag.load()) {
                 for (uint i = 0; i < NUMBER_OF_BUFFER_ELEMENTS; ++i) {
                     message_buffer.buffer[i] = mt_rand();
                 }

@@ -8,7 +8,7 @@
                             {
                                 "dir": "output",
                                 "inst": "queue1",
-                                "name": "q1"
+                                "name": "outputQueue"
                             }
                         ]
                     },
@@ -21,9 +21,10 @@
                             {
                                 "dir": "input",
                                 "inst": "queue1",
-                                "name": "q1"
+                                "name": "inputQueue"
                             }
-                        ]
+                        ],
+                        "output_file": "output1"
                     },
                     "inst": "c1",
                     "plugin": "Consumer"

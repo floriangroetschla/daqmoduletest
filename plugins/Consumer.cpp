@@ -8,8 +8,6 @@
 #include "appfwk/DAQModuleHelper.hpp"
 #include "logging/Logging.hpp"
 
-#define OUTPUT_FILE "output_file"
-
 namespace dunedaq {
     namespace daqmoduletest {
         Consumer::Consumer(const std::string& name) : dunedaq::appfwk::DAQModule(name), thread_(std::bind(&Consumer::do_work, this, std::placeholders::_1)), inputQueue() {
@@ -18,13 +16,15 @@ namespace dunedaq {
         }
 
         void Consumer::init(const nlohmann::json& init_data) {
+            m_output_file = init_data["output_file"];
             try {
-                auto qi = appfwk::queue_index(init_data, {"q1"});
-                inputQueue.reset(new source_t(qi["q1"].inst));
+                auto qi = appfwk::queue_index(init_data, {"inputQueue"});
+                inputQueue.reset(new source_t(qi["inputQueue"].inst));
             } catch (const ers::Issue& excpt) {
                 TLOG() << "Could not initialize queue" << std::endl;
             }
-            if (remove(OUTPUT_FILE) == 0) {
+
+            if (remove(m_output_file.c_str()) == 0) {
                 TLOG() << "Removed existing output file from previous run" << std::endl;
             }
         }
@@ -48,7 +48,7 @@ namespace dunedaq {
         }
 
         void Consumer::do_work(std::atomic<bool>& running_flag) {
-            m_output_stream.open(OUTPUT_FILE);
+            m_output_stream.open(m_output_file);
             while (running_flag.load()) {
                 try {
                     inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
