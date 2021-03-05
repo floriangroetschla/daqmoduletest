@@ -45,10 +45,6 @@ namespace dunedaq {
         std::atomic<uint64_t> m_bytes_sent{0};
     };
 
-    struct ProducerInformation {
-        uint64_t bytes_sent;
-    };
-
     }
 }
 

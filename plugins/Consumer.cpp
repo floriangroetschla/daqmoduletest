@@ -2,6 +2,7 @@
 // Created by fgrotsch on 3/4/21.
 //
 
+#include "daqmoduletest/consumerinfo/Nljs.hpp"
 #include "Consumer.hpp"
 
 #include "appfwk/DAQModuleHelper.hpp"
@@ -22,8 +23,11 @@ namespace dunedaq {
             }
         }
 
-        void Consumer::get_info(opmonlib::InfoCollector& /*ci*/, int /*level*/) {
+        void Consumer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
+            consumerinfo::Info consumerInfo;
 
+            consumerInfo.bytes_received = m_bytes_received.load();
+            ci.add(consumerInfo);
         }
 
         void Consumer::do_start(const nlohmann::json& /*args*/) {

@@ -6,7 +6,8 @@ find_package(daq-cmake REQUIRED)
 daq_setup_environment()
 
 
-find_package(ers REQUIRED)     
+find_package(ers REQUIRED)
+find_package(rcif REQUIRED)
 find_package(appfwk REQUIRED)
 
 

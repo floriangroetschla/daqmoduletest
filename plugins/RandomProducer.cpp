@@ -2,6 +2,7 @@
 // Created by fgrotsch on 3/4/21.
 //
 
+#include "daqmoduletest/randomproducerinfo/Nljs.hpp"
 #include "RandomProducer.hpp"
 #include "ers/Issue.hpp"
 #include "appfwk/DAQModuleHelper.hpp"
@@ -26,8 +27,10 @@ namespace dunedaq {
         }
 
         void RandomProducer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
-            ProducerInformation pi;
-            ci.add(pi);
+            randomproducerinfo::Info producerInfo;
+
+            producerInfo.bytes_sent = m_bytes_sent.load();
+            ci.add(producerInfo);
         }
 
         void RandomProducer::do_start(const nlohmann::json& /*args*/) {
