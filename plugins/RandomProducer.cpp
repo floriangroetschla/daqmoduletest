@@ -25,8 +25,9 @@ namespace dunedaq {
             }
         }
 
-        void RandomProducer::get_info(opmonlib::InfoCollector& /*ci*/, int /*level*/) {
-
+        void RandomProducer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
+            ProducerInformation pi;
+            ci.add(pi);
         }
 
         void RandomProducer::do_start(const nlohmann::json& /*args*/) {
@@ -44,12 +45,13 @@ namespace dunedaq {
                 }
                 try {
                     outputQueue->push(message_buffer, std::chrono::milliseconds(100));
+                    m_bytes_sent += MESSAGE_SIZE;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     std::cout << "Could not push to queue" << std::endl;
                 }
-                std::cout << "Pushed message" << std::endl;
+                //std::cout << "Pushed message" << std::endl;
                 //std::cout << "Pushed random sequence " << message_buffer << std::endl;
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
         }
     }

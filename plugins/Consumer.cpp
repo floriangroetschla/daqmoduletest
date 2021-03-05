@@ -38,12 +38,13 @@ namespace dunedaq {
             while (running_flag.load()) {
                 try {
                     inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
-                    std::cout << "Received message" << std::endl;
+                    m_bytes_received += MESSAGE_SIZE;
+                    //std::cout << "Received message" << std::endl;
                     //std::cout << "Received random sequence " << message_buffer << std::endl;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     continue;
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                //std::this_thread::sleep_for(std::chrono::milliseconds(500));
             }
         }
     }

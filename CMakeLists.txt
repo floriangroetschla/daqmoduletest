@@ -9,6 +9,9 @@ daq_setup_environment()
 find_package(ers REQUIRED)     
 find_package(appfwk REQUIRED)
 
+
+daq_codegen(*.jsonnet TEMPLATES Structs.hpp.j2 Nljs.hpp.j2 )
+
 ##############################################################################
 # Note that when the ers library is linked in, it uses a "::" because
 # it's in an external package, not a local CMake target. The semantics

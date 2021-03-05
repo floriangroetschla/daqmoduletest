@@ -42,7 +42,13 @@ namespace dunedaq {
         std::mt19937 mt_rand;
 
         Message message_buffer;
+        std::atomic<uint64_t> m_bytes_sent{0};
     };
+
+    struct ProducerInformation {
+        uint64_t bytes_sent;
+    };
+
     }
 }
 

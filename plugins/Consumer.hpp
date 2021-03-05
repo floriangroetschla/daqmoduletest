@@ -38,6 +38,7 @@ namespace dunedaq {
         std::unique_ptr<source_t> inputQueue;
 
         Message message_buffer;
+        std::atomic<uint64_t> m_bytes_received {0};
     };
     }
 }
