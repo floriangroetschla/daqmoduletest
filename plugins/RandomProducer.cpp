@@ -6,6 +6,7 @@
 #include "RandomProducer.hpp"
 #include "ers/Issue.hpp"
 #include "appfwk/DAQModuleHelper.hpp"
+#include "logging/Logging.hpp"
 
 #include <vector>
 
@@ -22,7 +23,7 @@ namespace dunedaq {
                 auto qi = appfwk::queue_index(init_data, {"q1"});
                 outputQueue.reset(new sink_t(qi["q1"].inst));
             } catch (const ers::Issue& excpt) {
-                std::cout << "Could not initialize queue" << std::endl;
+                TLOG() << "Could not initialize queue" << std::endl;
             }
         }
 
@@ -35,10 +36,12 @@ namespace dunedaq {
 
         void RandomProducer::do_start(const nlohmann::json& /*args*/) {
             thread_.start_working_thread();
+            TLOG() << get_name() << " successfully started";
         }
 
         void RandomProducer::do_stop(const nlohmann::json& /*args*/) {
             thread_.stop_working_thread();
+            TLOG() << get_name() << " successfully stopped";
         }
 
         void RandomProducer::do_work(std::atomic<bool>& running_flag) {
@@ -50,11 +53,8 @@ namespace dunedaq {
                     outputQueue->push(message_buffer, std::chrono::milliseconds(100));
                     m_bytes_sent += MESSAGE_SIZE;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
-                    std::cout << "Could not push to queue" << std::endl;
+                    TLOG() << "Could not push to queue" << std::endl;
                 }
-                //std::cout << "Pushed message" << std::endl;
-                //std::cout << "Pushed random sequence " << message_buffer << std::endl;
-                //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
         }
     }

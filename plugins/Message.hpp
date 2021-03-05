@@ -6,12 +6,12 @@
 #define DAQMODULETEST_MESSAGE_HPP
 
 #define MESSAGE_SIZE 4096
-#define NUMBER_OF_BUFFER_ELEMENTS (MESSAGE_SIZE / sizeof(uint_fast32_t))
+#define NUMBER_OF_BUFFER_ELEMENTS (MESSAGE_SIZE / sizeof(uint32_t))
 
 namespace dunedaq {
     namespace daqmoduletest {
         struct Message {
-            uint_fast32_t buffer[NUMBER_OF_BUFFER_ELEMENTS];
+            uint32_t buffer[NUMBER_OF_BUFFER_ELEMENTS];
         };
 
         // For debugging purposes

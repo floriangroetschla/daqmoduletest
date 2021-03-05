@@ -6,6 +6,9 @@
 #include "Consumer.hpp"
 
 #include "appfwk/DAQModuleHelper.hpp"
+#include "logging/Logging.hpp"
+
+#define OUTPUT_FILE "output_file"
 
 namespace dunedaq {
     namespace daqmoduletest {
@@ -19,7 +22,10 @@ namespace dunedaq {
                 auto qi = appfwk::queue_index(init_data, {"q1"});
                 inputQueue.reset(new source_t(qi["q1"].inst));
             } catch (const ers::Issue& excpt) {
-                std::cout << "Could not initialize queue" << std::endl;
+                TLOG() << "Could not initialize queue" << std::endl;
+            }
+            if (remove(OUTPUT_FILE) == 0) {
+                TLOG() << "Removed existing output file from previous run" << std::endl;
             }
         }
 
@@ -27,29 +33,33 @@ namespace dunedaq {
             consumerinfo::Info consumerInfo;
 
             consumerInfo.bytes_received = m_bytes_received.load();
+            consumerInfo.bytes_written = m_bytes_written.load();
             ci.add(consumerInfo);
         }
 
         void Consumer::do_start(const nlohmann::json& /*args*/) {
             thread_.start_working_thread();
+            TLOG() << get_name() << " successfully started";
         }
 
         void Consumer::do_stop(const nlohmann::json& /*args*/) {
             thread_.stop_working_thread();
+            TLOG() << get_name() << " successfully stopped";
         }
 
         void Consumer::do_work(std::atomic<bool>& running_flag) {
+            m_output_stream.open(OUTPUT_FILE);
             while (running_flag.load()) {
                 try {
                     inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
                     m_bytes_received += MESSAGE_SIZE;
-                    //std::cout << "Received message" << std::endl;
-                    //std::cout << "Received random sequence " << message_buffer << std::endl;
+                    m_output_stream.write((char*)&message_buffer.buffer[0], MESSAGE_SIZE);
+                    m_bytes_written += MESSAGE_SIZE;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     continue;
                 }
-                //std::this_thread::sleep_for(std::chrono::milliseconds(500));
             }
+            m_output_stream.close();
         }
     }
 }

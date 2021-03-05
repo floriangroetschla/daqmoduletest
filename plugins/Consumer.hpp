@@ -9,6 +9,8 @@
 #include "appfwk/DAQSource.hpp"
 #include "appfwk/ThreadHelper.hpp"
 #include "Message.hpp"
+#include <iostream>
+#include <fstream>
 
 #include <atomic>
 
@@ -38,7 +40,9 @@ namespace dunedaq {
         std::unique_ptr<source_t> inputQueue;
 
         Message message_buffer;
-        std::atomic<uint64_t> m_bytes_received {0};
+        std::atomic<uint64_t> m_bytes_received{0};
+        std::atomic<uint64_t> m_bytes_written{0};
+        std::ofstream m_output_stream;
     };
     }
 }
