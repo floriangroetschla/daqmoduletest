@@ -7,12 +7,12 @@
                         "qinfos": [
                             {
                                 "dir": "output",
-                                "inst": "orig1",
+                                "inst": "queue1",
                                 "name": "q1"
                             }
                         ]
                     },
-                    "inst": "rdlg",
+                    "inst": "rp1",
                     "plugin": "RandomProducer"
                 },
                 {
@@ -20,19 +20,19 @@
                         "qinfos": [
                             {
                                 "dir": "input",
-                                "inst": "orig1",
-                                "name": "input"
+                                "inst": "queue1",
+                                "name": "q1"
                             }
                         ]
                     },
-                    "inst": "lr",
+                    "inst": "c1",
                     "plugin": "Consumer"
                 }
             ],
             "queues": [
                 {
                     "capacity": 100,
-                    "inst": "orig1",
+                    "inst": "queue1",
                     "kind": "FollySPSCQueue"
                 }
             ]

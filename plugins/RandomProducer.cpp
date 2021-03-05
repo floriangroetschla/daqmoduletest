@@ -4,6 +4,7 @@
 
 #include "RandomProducer.hpp"
 #include "ers/Issue.hpp"
+#include "appfwk/DAQModuleHelper.hpp"
 
 #include <vector>
 
@@ -16,15 +17,11 @@ namespace dunedaq {
         }
 
         void RandomProducer::init(const nlohmann::json& init_data) {
-            auto ini = init_data.get<appfwk::app::ModInit>();
-            for (const auto& qi : ini.qinfos) {
-                if (qi.dir == "output") {
-                    try {
-                        outputQueue = std::unique_ptr<sink_t>(new sink_t(qi.inst));
-                    } catch (const ers::Issue& excpt) {
-                        std::cout << "Could not initialize queue" << std::endl;
-                    }
-                }
+            try {
+                auto qi = appfwk::queue_index(init_data, {"q1"});
+                outputQueue.reset(new sink_t(qi["q1"].inst));
+            } catch (const ers::Issue& excpt) {
+                std::cout << "Could not initialize queue" << std::endl;
             }
         }
 

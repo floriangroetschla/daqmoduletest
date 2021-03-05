@@ -14,9 +14,9 @@ namespace dunedaq {
         }
 
         void Consumer::init(const nlohmann::json& init_data) {
-            auto qi = appfwk::queue_index(init_data, {"input"});
             try {
-                inputQueue.reset(new source_t(qi["input"].inst));
+                auto qi = appfwk::queue_index(init_data, {"q1"});
+                inputQueue.reset(new source_t(qi["q1"].inst));
             } catch (const ers::Issue& excpt) {
                 std::cout << "Could not initialize queue" << std::endl;
             }
