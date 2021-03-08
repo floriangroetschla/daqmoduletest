@@ -5,7 +5,8 @@
 #ifndef DAQMODULETEST_MESSAGE_HPP
 #define DAQMODULETEST_MESSAGE_HPP
 
-#define MESSAGE_SIZE 4096
+#include "message_size_conf.h"
+
 #define NUMBER_OF_BUFFER_ELEMENTS (MESSAGE_SIZE / sizeof(uint32_t))
 
 namespace dunedaq {
