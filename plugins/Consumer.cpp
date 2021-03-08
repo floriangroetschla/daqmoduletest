@@ -18,6 +18,7 @@ namespace dunedaq {
         void Consumer::init(const nlohmann::json& init_data) {
             m_output_file = init_data["output_file"];
             std::string log_file = init_data["log_file"];
+            m_bytes_to_receive = init_data["bytes_to_receive"];
             m_log_stream.open(log_file);
             try {
                 auto qi = appfwk::queue_index(init_data, {"inputQueue"});
@@ -36,7 +37,14 @@ namespace dunedaq {
 
             consumerInfo.bytes_received = m_bytes_received.load();
             consumerInfo.bytes_written = m_bytes_written.load();
+            consumerInfo.completed = m_completed_work.load();
             consumerInfo.message_size = MESSAGE_SIZE;
+            consumerInfo.timestamp = std::time(0);
+            consumerInfo.throughput = 0.0;
+            if (m_completed_work) {
+                std::chrono::duration<double> time_passed = std::chrono::duration_cast<std::chrono::duration<double>>(m_time_of_completion - m_time_of_start_work);
+                consumerInfo.throughput = static_cast<double>(m_bytes_received) / 1000000.0 / time_passed.count();
+            }
             ci.add(consumerInfo);
 
             nlohmann::json j;
@@ -56,7 +64,8 @@ namespace dunedaq {
 
         void Consumer::do_work(std::atomic<bool>& running_flag) {
             m_output_stream.open(m_output_file);
-            while (running_flag.load()) {
+            m_time_of_start_work = std::chrono::steady_clock::now();
+            while (running_flag.load() && m_bytes_written < m_bytes_to_receive) {
                 try {
                     inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
                     m_bytes_received += MESSAGE_SIZE;
@@ -67,7 +76,9 @@ namespace dunedaq {
                     continue;
                 }
             }
+            m_time_of_completion = std::chrono::steady_clock::now();
             m_output_stream.close();
+            m_completed_work = true;
         }
     }
 }

@@ -10,7 +10,8 @@
                                 "inst": "queue1",
                                 "name": "outputQueue"
                             }
-                        ]
+                        ],
+                        "bytes_to_send": 4294967296
                     },
                     "inst": "rp1",
                     "plugin": "RandomProducer"
@@ -25,7 +26,8 @@
                             }
                         ],
                         "output_file": "c1_output",
-                        "log_file": "c1_log.jsonl"
+                        "log_file": "c1_log.jsonl",
+                        "bytes_to_receive": 4294967296
                     },
                     "inst": "c1",
                     "plugin": "Consumer"

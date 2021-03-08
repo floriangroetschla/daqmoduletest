@@ -45,6 +45,10 @@ namespace dunedaq {
         std::ofstream m_output_stream;
         std::string m_output_file;
         std::ofstream m_log_stream;
+        std::chrono::steady_clock::time_point m_time_of_start_work;
+        std::chrono::steady_clock::time_point m_time_of_completion;
+        std::atomic<bool> m_completed_work{false};
+        uint64_t m_bytes_to_receive{0};
     };
     }
 }
