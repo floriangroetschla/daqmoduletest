@@ -24,7 +24,8 @@
                                 "name": "inputQueue"
                             }
                         ],
-                        "output_file": "output1"
+                        "output_file": "c1_output",
+                        "log_file": "c1_log.jsonl"
                     },
                     "inst": "c1",
                     "plugin": "Consumer"

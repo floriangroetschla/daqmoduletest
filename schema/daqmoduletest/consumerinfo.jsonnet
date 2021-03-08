@@ -11,6 +11,7 @@ local info = {
 
    info: s.record("Info", [
        s.field("class_name", self.cl, "consumerinfo", doc="Info class name"),
+       s.field("message_size", self.uint8, 0, doc="Message size in bytes"),
        s.field("bytes_received", self.uint8, 0, doc="Total number of bytes received from the queue"),
        s.field("bytes_written", self.uint8, 0, doc="Total number of bytes written to disk")
    ], doc="RandomProducer information")

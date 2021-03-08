@@ -17,6 +17,8 @@ namespace dunedaq {
 
         void Consumer::init(const nlohmann::json& init_data) {
             m_output_file = init_data["output_file"];
+            std::string log_file = init_data["log_file"];
+            m_log_stream.open(log_file);
             try {
                 auto qi = appfwk::queue_index(init_data, {"inputQueue"});
                 inputQueue.reset(new source_t(qi["inputQueue"].inst));
@@ -34,7 +36,12 @@ namespace dunedaq {
 
             consumerInfo.bytes_received = m_bytes_received.load();
             consumerInfo.bytes_written = m_bytes_written.load();
+            consumerInfo.message_size = MESSAGE_SIZE;
             ci.add(consumerInfo);
+
+            nlohmann::json j;
+            consumerinfo::to_json(j, consumerInfo);
+            m_log_stream << j.dump() << std::endl;
         }
 
         void Consumer::do_start(const nlohmann::json& /*args*/) {
@@ -54,6 +61,7 @@ namespace dunedaq {
                     inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
                     m_bytes_received += MESSAGE_SIZE;
                     m_output_stream.write((char*)&message_buffer.buffer[0], MESSAGE_SIZE);
+                    m_output_stream.flush();
                     m_bytes_written += MESSAGE_SIZE;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     continue;
