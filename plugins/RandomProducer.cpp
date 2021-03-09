@@ -19,7 +19,6 @@ namespace dunedaq {
         }
 
         void RandomProducer::init(const nlohmann::json& init_data) {
-            bytes_to_send = init_data["bytes_to_send"];
             try {
                 auto qi = appfwk::queue_index(init_data, {"outputQueue"});
                 outputQueue.reset(new sink_t(qi["outputQueue"].inst));
@@ -46,7 +45,7 @@ namespace dunedaq {
         }
 
         void RandomProducer::do_work(std::atomic<bool>& running_flag) {
-            while ((m_bytes_sent < bytes_to_send) && running_flag.load()) {
+            while ((m_bytes_sent < BYTES_TO_SEND) && running_flag.load()) {
                 for (uint i = 0; i < NUMBER_OF_BUFFER_ELEMENTS; ++i) {
                     message_buffer.buffer[i] = mt_rand();
                 }

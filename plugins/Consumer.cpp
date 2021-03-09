@@ -16,9 +16,8 @@ namespace dunedaq {
         }
 
         void Consumer::init(const nlohmann::json& init_data) {
-            m_output_file = init_data["output_file"];
-            std::string log_file = init_data["log_file"];
-            m_bytes_to_receive = init_data["bytes_to_receive"];
+            m_output_file = get_name() + "_output";
+            std::string log_file = get_name() + "_log.jsonl";
             m_log_stream.open(log_file);
             try {
                 auto qi = appfwk::queue_index(init_data, {"inputQueue"});
@@ -65,7 +64,7 @@ namespace dunedaq {
         void Consumer::do_work(std::atomic<bool>& running_flag) {
             m_output_stream.open(m_output_file);
             m_time_of_start_work = std::chrono::steady_clock::now();
-            while (running_flag.load() && m_bytes_written < m_bytes_to_receive) {
+            while (running_flag.load() && m_bytes_written < BYTES_TO_SEND) {
                 try {
                     inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
                     m_bytes_received += MESSAGE_SIZE;

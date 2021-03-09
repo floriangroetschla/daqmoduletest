@@ -43,7 +43,6 @@ namespace dunedaq {
 
         Message message_buffer;
         std::atomic<uint64_t> m_bytes_sent{0};
-        uint64_t bytes_to_send{0};
     };
 
     }
