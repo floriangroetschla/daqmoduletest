@@ -3,6 +3,7 @@
 //
 
 #include "daqmoduletest/randomproducerinfo/Nljs.hpp"
+#include "daqmoduletest/conf/Nljs.hpp"
 #include "RandomProducer.hpp"
 #include "ers/Issue.hpp"
 #include "appfwk/DAQModuleHelper.hpp"
@@ -34,7 +35,8 @@ namespace dunedaq {
             ci.add(producerInfo);
         }
 
-        void RandomProducer::do_start(const nlohmann::json& /*args*/) {
+        void RandomProducer::do_start(const nlohmann::json& args) {
+            m_conf = args.get<conf::Conf>();
             thread_.start_working_thread();
             TLOG() << get_name() << " successfully started";
         }
@@ -45,13 +47,14 @@ namespace dunedaq {
         }
 
         void RandomProducer::do_work(std::atomic<bool>& running_flag) {
-            while ((m_bytes_sent < BYTES_TO_SEND) && running_flag.load()) {
-                for (uint i = 0; i < NUMBER_OF_BUFFER_ELEMENTS; ++i) {
-                    message_buffer.buffer[i] = mt_rand();
+            while ((m_bytes_sent < m_conf.bytes_to_send) && running_flag.load()) {
+                std::vector<int> buffer(m_conf.message_size / sizeof(int));
+                for (uint i = 0; i < buffer.size(); ++i) {
+                    buffer[i] = mt_rand();
                 }
                 try {
-                    outputQueue->push(message_buffer, std::chrono::milliseconds(100));
-                    m_bytes_sent += MESSAGE_SIZE;
+                    outputQueue->push(buffer, std::chrono::milliseconds(10000));
+                    m_bytes_sent += m_conf.message_size;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     TLOG() << "Could not push to queue" << std::endl;
                 }

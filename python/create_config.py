@@ -9,12 +9,14 @@ moo.otypes.load_types('cmdlib/cmd.jsonnet')
 moo.otypes.load_types('rcif/cmd.jsonnet')
 moo.otypes.load_types('appfwk/cmd.jsonnet')
 moo.otypes.load_types('appfwk/app.jsonnet')
+moo.otypes.load_types('daqmoduletest/conf.jsonnet')
 
 # Import new types
 import dunedaq.cmdlib.cmd as bcmd # base command,
 import dunedaq.appfwk.cmd as cmd # AddressedCmd,
 import dunedaq.appfwk.app as app # AddressedCmd,
 import dunedaq.rcif.cmd as rc # Addressed run control Cmd,
+import dunedaq.daqmoduletest.conf as daq_test_conf
 
 from appfwk.utils import mcmd, mrccmd, mspec
 
@@ -22,7 +24,8 @@ import json
 import math
 
 def generate(
-        QUEUE_PAIRS = 1
+        QUEUE_PAIRS = 1,
+        BYTES_TO_SEND = 4096
     ):
 
     # Define modules and queues
@@ -51,7 +54,7 @@ def generate(
     )
 
     startcmd = mrccmd("start", "INITIAL", "RUNNING", [
-                (".*", None),
+                (".*", daq_test_conf.Conf(bytes_to_send=BYTES_TO_SEND, message_size=BYTES_TO_SEND))
             ])
 
     stopcmd = mrccmd("stop", "RUNNING", "INITIAL", [
@@ -77,8 +80,9 @@ if __name__ == '__main__':
 
     @click.command(context_settings=CONTEXT_SETTINGS)
     @click.option('-q', '--queue-pairs', default=1)
+    @click.option('-b', '--bytes_to_send', default=4096)
     @click.argument('json_file', type=click.Path(), default='app.json')
-    def cli(queue_pairs, json_file):
+    def cli(queue_pairs, bytes_to_send, json_file):
         """
           JSON_FILE: Input raw data file.
           JSON_FILE: Output json configuration file.
@@ -86,7 +90,8 @@ if __name__ == '__main__':
 
         with open(json_file, 'w') as f:
             f.write(generate(
-                    QUEUE_PAIRS = queue_pairs
+                    QUEUE_PAIRS = queue_pairs,
+                    BYTES_TO_SEND = bytes_to_send
                 ))
 
         print(f"'{json_file}' generation completed.")

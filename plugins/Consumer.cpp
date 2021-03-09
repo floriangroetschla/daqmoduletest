@@ -3,6 +3,7 @@
 //
 
 #include "daqmoduletest/consumerinfo/Nljs.hpp"
+#include "daqmoduletest/conf/Nljs.hpp"
 #include "Consumer.hpp"
 
 #include "appfwk/DAQModuleHelper.hpp"
@@ -16,8 +17,8 @@ namespace dunedaq {
         }
 
         void Consumer::init(const nlohmann::json& init_data) {
-            m_output_file = get_name() + "_output";
-            std::string log_file = get_name() + "_log.jsonl";
+            m_output_file = "runs/" + get_name() + "_output";
+            std::string log_file = "runs/" + get_name() + "_log.jsonl";
             m_log_stream.open(log_file);
             try {
                 auto qi = appfwk::queue_index(init_data, {"inputQueue"});
@@ -37,7 +38,7 @@ namespace dunedaq {
             consumerInfo.bytes_received = m_bytes_received.load();
             consumerInfo.bytes_written = m_bytes_written.load();
             consumerInfo.completed = m_completed_work.load();
-            consumerInfo.message_size = MESSAGE_SIZE;
+            consumerInfo.message_size = m_conf.message_size;
             consumerInfo.timestamp = std::time(0);
             consumerInfo.throughput = 0.0;
             if (m_completed_work) {
@@ -51,7 +52,8 @@ namespace dunedaq {
             m_log_stream << j.dump() << std::endl;
         }
 
-        void Consumer::do_start(const nlohmann::json& /*args*/) {
+        void Consumer::do_start(const nlohmann::json& args) {
+            m_conf = args.get<conf::Conf>();
             thread_.start_working_thread();
             TLOG() << get_name() << " successfully started";
         }
@@ -64,13 +66,14 @@ namespace dunedaq {
         void Consumer::do_work(std::atomic<bool>& running_flag) {
             m_output_stream.open(m_output_file);
             m_time_of_start_work = std::chrono::steady_clock::now();
-            while (running_flag.load() && m_bytes_written < BYTES_TO_SEND) {
+            while (running_flag.load() && m_bytes_written < m_conf.bytes_to_send) {
+                std::vector<int> buffer(m_conf.message_size / sizeof(int));
                 try {
-                    inputQueue->pop(message_buffer, std::chrono::milliseconds(100));
-                    m_bytes_received += MESSAGE_SIZE;
-                    m_output_stream.write((char*)&message_buffer.buffer[0], MESSAGE_SIZE);
+                    inputQueue->pop(buffer, std::chrono::milliseconds(10000));
+                    m_bytes_received += m_conf.message_size;
+                    m_output_stream.write((char*)buffer.data(), m_conf.message_size);
                     m_output_stream.flush();
-                    m_bytes_written += MESSAGE_SIZE;
+                    m_bytes_written += m_conf.message_size;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     continue;
                 }

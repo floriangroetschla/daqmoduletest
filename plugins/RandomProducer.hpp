@@ -9,7 +9,7 @@
 #include "appfwk/DAQSink.hpp"
 #include "appfwk/ThreadHelper.hpp"
 #include "appfwk/app/Nljs.hpp"
-#include "Message.hpp"
+#include "daqmoduletest/conf/Structs.hpp"
 
 #include <atomic>
 #include <random>
@@ -36,13 +36,13 @@ namespace dunedaq {
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);
 
-        using sink_t = dunedaq::appfwk::DAQSink<Message>;
+        using sink_t = dunedaq::appfwk::DAQSink<std::vector<int>>;
         std::unique_ptr<sink_t> outputQueue;
 
         std::mt19937 mt_rand;
 
-        Message message_buffer;
         std::atomic<uint64_t> m_bytes_sent{0};
+        conf::Conf m_conf;
     };
 
     }

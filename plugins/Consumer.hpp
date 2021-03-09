@@ -8,10 +8,10 @@
 #include "appfwk/DAQModule.hpp"
 #include "appfwk/DAQSource.hpp"
 #include "appfwk/ThreadHelper.hpp"
-#include "Message.hpp"
+#include "daqmoduletest/conf/Structs.hpp"
+
 #include <iostream>
 #include <fstream>
-
 #include <atomic>
 
 namespace dunedaq {
@@ -36,10 +36,9 @@ namespace dunedaq {
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);
 
-        using source_t = dunedaq::appfwk::DAQSource<Message>;
+        using source_t = dunedaq::appfwk::DAQSource<std::vector<int>>;
         std::unique_ptr<source_t> inputQueue;
 
-        Message message_buffer;
         std::atomic<uint64_t> m_bytes_received{0};
         std::atomic<uint64_t> m_bytes_written{0};
         std::ofstream m_output_stream;
@@ -48,6 +47,7 @@ namespace dunedaq {
         std::chrono::steady_clock::time_point m_time_of_start_work;
         std::chrono::steady_clock::time_point m_time_of_completion;
         std::atomic<bool> m_completed_work{false};
+        conf::Conf m_conf;
     };
     }
 }

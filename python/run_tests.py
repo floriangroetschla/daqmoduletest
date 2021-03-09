@@ -6,8 +6,7 @@ from subprocess import Popen, PIPE
 import pexpect
 
 # config parameters
-#bytes_total = 2097152
-bytes_total =  2097153
+bytes_total =  2097152
 num_queues = 1
 
 child = pexpect.spawn('bash')
@@ -22,19 +21,14 @@ child.expect('This script has been sourced successfully')
 
 # Build the project
 print('Build project')
-bytes_per_queue = int(bytes_total / num_queues)
-
-f = open("sourcecode/daqmoduletest/plugins/message_size_conf.h", "w")
-f.write("#define BYTES_TO_SEND " + str(bytes_per_queue) + '\n')
-f.write("#define MESSAGE_SIZE " + str(bytes_per_queue))
-f.close()
 
 child.sendline('dbt-build.sh --install')
 child.expect('Installation complete.')
 
 # Generate configuration
 print('Generate config')
-child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(num_queues))
+bytes_per_queue = int(bytes_total / num_queues)
+child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(num_queues) + ' -b ' + str(bytes_per_queue))
 child.expect('generation completed.')
 
 # Run the program
