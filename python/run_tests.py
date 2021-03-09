@@ -8,6 +8,7 @@ import json
 import pandas as pd
 
 # config parameters
+output_file = "output"
 bytes_total =  [2**x for x in range(12,31)]
 #num_queues = [1, 2, 4, 8, 16]
 num_queues = [1]
@@ -36,7 +37,7 @@ for n in num_queues:
         # Generate configuration
         print('Generate config for ' + str(n) + ' queues and ' + str(bytes) + " bytes")
         bytes_per_queue = int(bytes / n)
-        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes))
+        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes) + ' -o ' + str(output_file))
         child.expect('generation completed.')
 
         for i in range(num_runs):

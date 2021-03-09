@@ -25,7 +25,8 @@ import math
 
 def generate(
         QUEUE_PAIRS = 1,
-        BYTES_TO_SEND = 4096
+        BYTES_TO_SEND = 4096,
+        OUTPUT_FILE = "output"
     ):
 
     # Define modules and queues
@@ -54,7 +55,7 @@ def generate(
     )
 
     startcmd = mrccmd("start", "INITIAL", "RUNNING", [
-                (".*", daq_test_conf.Conf(bytes_to_send=BYTES_TO_SEND, message_size=BYTES_TO_SEND))
+                (".*", daq_test_conf.Conf(bytes_to_send=BYTES_TO_SEND, message_size=BYTES_TO_SEND, output_file=OUTPUT_FILE))
             ])
 
     stopcmd = mrccmd("stop", "RUNNING", "INITIAL", [
@@ -81,8 +82,9 @@ if __name__ == '__main__':
     @click.command(context_settings=CONTEXT_SETTINGS)
     @click.option('-q', '--queue-pairs', default=1)
     @click.option('-b', '--bytes_to_send', default=4096)
+    @click.option('-o', '--output_file', default='output')
     @click.argument('json_file', type=click.Path(), default='app.json')
-    def cli(queue_pairs, bytes_to_send, json_file):
+    def cli(queue_pairs, bytes_to_send, output_file, json_file):
         """
           JSON_FILE: Input raw data file.
           JSON_FILE: Output json configuration file.
@@ -91,7 +93,8 @@ if __name__ == '__main__':
         with open(json_file, 'w') as f:
             f.write(generate(
                     QUEUE_PAIRS = queue_pairs,
-                    BYTES_TO_SEND = bytes_to_send
+                    BYTES_TO_SEND = bytes_to_send,
+                    OUTPUT_FILE = output_file
                 ))
 
         print(f"'{json_file}' generation completed.")

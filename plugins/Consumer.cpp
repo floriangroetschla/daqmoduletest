@@ -17,7 +17,6 @@ namespace dunedaq {
         }
 
         void Consumer::init(const nlohmann::json& init_data) {
-            m_output_file = "runs/" + get_name() + "_output";
             std::string log_file = "runs/" + get_name() + "_log.jsonl";
             m_log_stream.open(log_file);
             try {
@@ -25,10 +24,6 @@ namespace dunedaq {
                 inputQueue.reset(new source_t(qi["inputQueue"].inst));
             } catch (const ers::Issue& excpt) {
                 TLOG() << "Could not initialize queue" << std::endl;
-            }
-
-            if (remove(m_output_file.c_str()) == 0) {
-                TLOG() << "Removed existing output file from previous run" << std::endl;
             }
         }
 
@@ -54,6 +49,9 @@ namespace dunedaq {
 
         void Consumer::do_start(const nlohmann::json& args) {
             m_conf = args.get<conf::Conf>();
+            if (remove(m_conf.output_file.c_str()) == 0) {
+                TLOG() << "Removed existing output file from previous run" << std::endl;
+            }
             thread_.start_working_thread();
             TLOG() << get_name() << " successfully started";
         }
@@ -64,7 +62,7 @@ namespace dunedaq {
         }
 
         void Consumer::do_work(std::atomic<bool>& running_flag) {
-            m_output_stream.open(m_output_file);
+            m_output_stream.open(m_conf.output_file);
             m_time_of_start_work = std::chrono::steady_clock::now();
             while (running_flag.load() && m_bytes_written < m_conf.bytes_to_send) {
                 std::vector<int> buffer(m_conf.message_size / sizeof(int));
