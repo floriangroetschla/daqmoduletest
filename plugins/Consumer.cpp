@@ -58,6 +58,7 @@ namespace dunedaq {
 
         void Consumer::do_stop(const nlohmann::json& /*args*/) {
             thread_.stop_working_thread();
+            remove(m_conf.output_file.c_str());
             TLOG() << get_name() << " successfully stopped";
         }
 
