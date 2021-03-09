@@ -8,10 +8,11 @@ import json
 import pandas as pd
 
 # config parameters
-output_file = "output"
-bytes_total =  [2**x for x in range(12,31)]
-#num_queues = [1, 2, 4, 8, 16]
-num_queues = [1]
+output_dir = "output"
+#bytes_total =  [2**x for x in range(12,31)]
+bytes_total = [4096]
+num_queues = [1, 2, 4, 8, 16]
+#num_queues = [1]
 num_runs = 5
 
 child = pexpect.spawn('bash')
@@ -37,7 +38,7 @@ for n in num_queues:
         # Generate configuration
         print('Generate config for ' + str(n) + ' queues and ' + str(bytes) + " bytes")
         bytes_per_queue = int(bytes / n)
-        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes) + ' -o ' + str(output_file))
+        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes_per_queue) + ' -o ' + str(output_dir))
         child.expect('generation completed.')
 
         for i in range(num_runs):
@@ -53,18 +54,20 @@ for n in num_queues:
             child.expect('Command stop execution resulted with: 1 OK')
             child.sendline('\003')
 
-            print('Get result')
-            file = open('runs/cons_0_log.jsonl', 'r')
-            lines = file.readlines()
-            result = json.loads(lines[-1])
-            if not result['completed']:
-                print('Run was not successfull')
-                exit
-            print(result)
-            result['n_queues'] = n
-            result['num_bytes'] = bytes
-            result['run_number'] = i
-            df = df.append(result, ignore_index=True)
+            print('Get results')
+            for j in range(n):
+                file = open('runs/cons_' + str(j) + '_log.jsonl', 'r')
+                lines = file.readlines()
+                result = json.loads(lines[-1])
+                if not result['completed']:
+                    print('Run was not successfull')
+                    exit
+                print(result)
+                result['n_queues'] = n
+                result['total_num_bytes'] = bytes
+                result['run_number'] = i
+                result['consumer_number'] = j
+                df = df.append(result, ignore_index=True)
 
         print("Run completed")
 

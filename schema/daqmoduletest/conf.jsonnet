@@ -13,7 +13,7 @@ local types = {
                 doc="Number of bytes to send in total"),
         s.field("message_size", self.size, 4096,
                 doc="Size of the messages in bytes"),
-        s.field("output_file", self.cl, "output", doc="Output file to write data to"),
+        s.field("output_dir", self.cl, "output", doc="Output dir to write data to"),
     ], doc="Configuration"),
 
 };

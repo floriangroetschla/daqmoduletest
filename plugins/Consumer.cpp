@@ -49,21 +49,25 @@ namespace dunedaq {
 
         void Consumer::do_start(const nlohmann::json& args) {
             m_conf = args.get<conf::Conf>();
-            if (remove(m_conf.output_file.c_str()) == 0) {
-                TLOG() << "Removed existing output file from previous run" << std::endl;
-            }
             thread_.start_working_thread();
             TLOG() << get_name() << " successfully started";
         }
 
         void Consumer::do_stop(const nlohmann::json& /*args*/) {
             thread_.stop_working_thread();
-            remove(m_conf.output_file.c_str());
             TLOG() << get_name() << " successfully stopped";
         }
 
         void Consumer::do_work(std::atomic<bool>& running_flag) {
-            m_output_stream.open(m_conf.output_file);
+            std::string output_file = m_conf.output_dir + "/output_" + get_name();
+            if (remove(output_file.c_str()) == 0) {
+                TLOG() << "Removed existing output file from previous run" << std::endl;
+            }
+            m_output_stream.open(output_file);
+            if (!m_output_stream.is_open()) {
+                TLOG() << "Couldn't open file" << std::endl;
+                return;
+            }
             m_time_of_start_work = std::chrono::steady_clock::now();
             while (running_flag.load() && m_bytes_written < m_conf.bytes_to_send) {
                 std::vector<int> buffer(m_conf.message_size / sizeof(int));
@@ -80,6 +84,7 @@ namespace dunedaq {
             m_time_of_completion = std::chrono::steady_clock::now();
             m_output_stream.close();
             m_completed_work = true;
+            remove(output_file.c_str());
         }
     }
 }
