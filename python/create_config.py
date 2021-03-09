@@ -28,7 +28,7 @@ def generate(
     # Define modules and queues
     queue_bare_specs = []
     for i in range(QUEUE_PAIRS):
-        queue_bare_specs.append(app.QueueSpec(inst="queue_"+str(i), kind="FollySPSCQueue", capacity=100))
+        queue_bare_specs.append(app.QueueSpec(inst="queue_"+str(i), kind="FollySPSCQueue", capacity=1))
 
     # Only needed to reproduce the same order as when using jsonnet
     queue_specs = app.QueueSpecs(sorted(queue_bare_specs, key=lambda x: x.inst))
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     @click.command(context_settings=CONTEXT_SETTINGS)
     @click.option('-q', '--queue-pairs', default=1)
     @click.argument('json_file', type=click.Path(), default='app.json')
-    def cli(queue_pairs, n_bytes, json_file):
+    def cli(queue_pairs, json_file):
         """
           JSON_FILE: Input raw data file.
           JSON_FILE: Output json configuration file.
