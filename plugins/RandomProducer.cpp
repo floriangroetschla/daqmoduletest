@@ -8,6 +8,7 @@
 #include "ers/Issue.hpp"
 #include "appfwk/DAQModuleHelper.hpp"
 #include "logging/Logging.hpp"
+#include "Issues.h"
 
 #include <vector>
 
@@ -24,7 +25,7 @@ namespace dunedaq {
                 auto qi = appfwk::queue_index(init_data, {"outputQueue"});
                 outputQueue.reset(new sink_t(qi["outputQueue"].inst));
             } catch (const ers::Issue& excpt) {
-                TLOG() << "Could not initialize queue" << std::endl;
+                throw QueueFatalError(ERS_HERE, get_name(), "outputQueue", excpt);
             }
         }
 
@@ -53,10 +54,12 @@ namespace dunedaq {
                     buffer[i] = mt_rand();
                 }
                 try {
-                    outputQueue->push(buffer, std::chrono::milliseconds(10000));
+                    outputQueue->push(buffer, std::chrono::milliseconds(1000));
                     m_bytes_sent += m_conf.message_size;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
-                    TLOG() << "Could not push to queue" << std::endl;
+                    std::ostringstream oss_warn;
+                    oss_warn << "push to output queue \"" << outputQueue->get_name() << "\"";
+                    ers::warning(dunedaq::appfwk::QueueTimeoutExpired(ERS_HERE, get_name(), oss_warn.str(),1000));
                 }
             }
         }

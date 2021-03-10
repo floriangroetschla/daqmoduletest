@@ -5,6 +5,7 @@
 #include "daqmoduletest/consumerinfo/Nljs.hpp"
 #include "daqmoduletest/conf/Nljs.hpp"
 #include "Consumer.hpp"
+#include "Issues.h"
 
 #include "appfwk/DAQModuleHelper.hpp"
 #include "logging/Logging.hpp"
@@ -23,7 +24,7 @@ namespace dunedaq {
                 auto qi = appfwk::queue_index(init_data, {"inputQueue"});
                 inputQueue.reset(new source_t(qi["inputQueue"].inst));
             } catch (const ers::Issue& excpt) {
-                TLOG() << "Could not initialize queue" << std::endl;
+                throw QueueFatalError(ERS_HERE, get_name(), "inputQueue", excpt);
             }
         }
 
@@ -65,14 +66,14 @@ namespace dunedaq {
             }
             m_output_stream.open(output_file);
             if (!m_output_stream.is_open()) {
-                TLOG() << "Couldn't open file" << std::endl;
+                throw FileError(ERS_HERE, get_name(), output_file);
                 return;
             }
             m_time_of_start_work = std::chrono::steady_clock::now();
             while (running_flag.load() && m_bytes_written < m_conf.bytes_to_send) {
                 std::vector<int> buffer(m_conf.message_size / sizeof(int));
                 try {
-                    inputQueue->pop(buffer, std::chrono::milliseconds(10000));
+                    inputQueue->pop(buffer, std::chrono::milliseconds(1000));
                     m_bytes_received += m_conf.message_size;
                     m_output_stream.write((char*)buffer.data(), m_conf.message_size);
                     m_output_stream.flush();
