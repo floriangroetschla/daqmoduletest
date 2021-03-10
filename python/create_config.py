@@ -74,6 +74,20 @@ def generate(
     jstr = json.dumps([c.pod() for c in cmd_seq], indent=4, sort_keys=True)
     return jstr
 
+# Generate a suitable pinning for epdtdi05
+def generate_pinfile(
+        QUEUE_PAIRS = 1
+    ):
+    pinnings = {}
+    pinnings['_comment'] = "Pinnings for epdtdi105"
+    pinnings['mini0'] = {}
+    for i in range(QUEUE_PAIRS):
+        pinnings['mini0']['prod_'+str(i)] = [2*i+1]
+        pinnings['mini0']['cons_'+str(i)] = [2*i+33]
+
+    jstr = json.dumps(pinnings, indent=4)
+    return jstr
+
 if __name__ == '__main__':
     CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -96,6 +110,9 @@ if __name__ == '__main__':
                     BYTES_TO_SEND = bytes_to_send,
                     OUTPUT_DIR = output_dir
                 ))
+
+        with open('pinnings.json', 'w') as f:
+            f.write(generate_pinfile(QUEUE_PAIRS=queue_pairs))
 
         print(f"'{json_file}' generation completed.")
 
