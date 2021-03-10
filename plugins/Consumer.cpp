@@ -12,7 +12,7 @@
 
 namespace dunedaq {
     namespace daqmoduletest {
-        Consumer::Consumer(const std::string& name) : dunedaq::appfwk::DAQModule(name), thread_(std::bind(&Consumer::do_work, this, std::placeholders::_1)), inputQueue() {
+        Consumer::Consumer(const std::string& name) : dunedaq::appfwk::DAQModule(name), thread_(std::bind(&Consumer::do_work, this, std::placeholders::_1)), inputQueue(), m_start_lock{} {
             register_command("start", &Consumer::do_start);
             register_command("stop", &Consumer::do_stop);
         }
@@ -26,6 +26,8 @@ namespace dunedaq {
             } catch (const ers::Issue& excpt) {
                 throw QueueFatalError(ERS_HERE, get_name(), "inputQueue", excpt);
             }
+            m_start_lock.lock();
+            thread_.start_working_thread(get_name());
         }
 
         void Consumer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
@@ -50,7 +52,7 @@ namespace dunedaq {
 
         void Consumer::do_start(const nlohmann::json& args) {
             m_conf = args.get<conf::Conf>();
-            thread_.start_working_thread(get_name());
+            m_start_lock.unlock();
             TLOG() << get_name() << " successfully started";
         }
 
@@ -60,6 +62,7 @@ namespace dunedaq {
         }
 
         void Consumer::do_work(std::atomic<bool>& running_flag) {
+            std::lock_guard<std::mutex> lock_guard(m_start_lock);
             std::string output_file = m_conf.output_dir + "/output_" + get_name();
             if (remove(output_file.c_str()) == 0) {
                 TLOG() << "Removed existing output file from previous run" << std::endl;

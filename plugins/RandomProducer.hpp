@@ -43,6 +43,7 @@ namespace dunedaq {
 
         std::atomic<uint64_t> m_bytes_sent{0};
         conf::Conf m_conf;
+        std::mutex m_start_lock;
     };
 
     }

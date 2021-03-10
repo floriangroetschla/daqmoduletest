@@ -15,7 +15,7 @@
 namespace dunedaq {
     namespace daqmoduletest {
 
-        RandomProducer::RandomProducer(const std::string& name) : dunedaq::appfwk::DAQModule(name), thread_(std::bind(&RandomProducer::do_work, this, std::placeholders::_1)), mt_rand{} {
+        RandomProducer::RandomProducer(const std::string& name) : dunedaq::appfwk::DAQModule(name), thread_(std::bind(&RandomProducer::do_work, this, std::placeholders::_1)), mt_rand{}, m_start_lock{} {
             register_command("start", &RandomProducer::do_start);
             register_command("stop", &RandomProducer::do_stop);
         }
@@ -27,6 +27,8 @@ namespace dunedaq {
             } catch (const ers::Issue& excpt) {
                 throw QueueFatalError(ERS_HERE, get_name(), "outputQueue", excpt);
             }
+            m_start_lock.lock();
+            thread_.start_working_thread(get_name());
         }
 
         void RandomProducer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
@@ -38,7 +40,7 @@ namespace dunedaq {
 
         void RandomProducer::do_start(const nlohmann::json& args) {
             m_conf = args.get<conf::Conf>();
-            thread_.start_working_thread(get_name());
+            m_start_lock.unlock();
             TLOG() << get_name() << " successfully started";
         }
 
@@ -48,6 +50,7 @@ namespace dunedaq {
         }
 
         void RandomProducer::do_work(std::atomic<bool>& running_flag) {
+            std::lock_guard<std::mutex> lock_guard(m_start_lock);
             while ((m_bytes_sent < m_conf.bytes_to_send) && running_flag.load()) {
                 std::vector<int> buffer(m_conf.message_size / sizeof(int));
                 for (uint i = 0; i < buffer.size(); ++i) {

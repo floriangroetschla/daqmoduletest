@@ -48,6 +48,7 @@ namespace dunedaq {
         std::chrono::steady_clock::time_point m_time_of_completion;
         std::atomic<bool> m_completed_work{false};
         conf::Conf m_conf;
+        std::mutex m_start_lock;
     };
     }
 }

@@ -79,11 +79,9 @@ def generate_pinfile(
         QUEUE_PAIRS = 1
     ):
     pinnings = {}
-    pinnings['_comment'] = "Pinnings for epdtdi105"
-    pinnings['mini0'] = {}
     for i in range(QUEUE_PAIRS):
-        pinnings['mini0']['prod_'+str(i)] = [2*i+1]
-        pinnings['mini0']['cons_'+str(i)] = [2*i+33]
+        pinnings['prod_'+str(i)] = [2*i+1]
+        pinnings['cons_'+str(i)] = [2*i+33]
 
     jstr = json.dumps(pinnings, indent=4)
     return jstr

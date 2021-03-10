@@ -48,6 +48,8 @@ for n in num_queues:
             child.expect('Available commands: | init | start | stop')
             child.sendline('init')
             child.expect('Command init execution resulted with: 1 OK')
+            os.system("python3 sourcecode/daqmoduletest/python/balancer.py --process daq_application --pinfile pinnings.json")
+
             child.sendline('start')
             child.expect('"completed": true,')
             child.sendline('stop')
