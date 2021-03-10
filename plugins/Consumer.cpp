@@ -49,7 +49,7 @@ namespace dunedaq {
 
         void Consumer::do_start(const nlohmann::json& args) {
             m_conf = args.get<conf::Conf>();
-            thread_.start_working_thread();
+            thread_.start_working_thread(get_name());
             TLOG() << get_name() << " successfully started";
         }
 
