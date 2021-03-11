@@ -88,6 +88,10 @@ def generate_pinfile(
         for i in range(QUEUE_PAIRS):
                 pinnings['prod_'+str(i)] = [2*i+1]
                 pinnings['cons_'+str(i)] = [2*i+33]
+    elif (PINNING_CONF == 'ascending'):
+        for i in range(QUEUE_PAIRS):
+                pinnings['prod_'+str(i)] = [2*i]
+                pinnings['cons_'+str(i)] = [2*i+1]
 
     jstr = json.dumps(pinnings, indent=4)
     return jstr

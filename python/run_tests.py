@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os, string
+import argparse
 import sys
 from subprocess import Popen, PIPE
 import pexpect
@@ -9,12 +10,27 @@ import json
 import pandas as pd
 import subprocess
 
+parser = argparse.ArgumentParser(description='Run storage tests for daqmoduletest')
+#parser.add_argument('--bytes_total', '-b', type=str, required=True, help='Total bytes to write to disk', default=4096)
+#parser.add_argument('--num_queues', '-q', type=str, required=True, help='Number of consumer/producer pairs', default=1)
+parser.add_argument('--output_dir', '-o', type=str, required=True, help='Directory where consumers write temporary output files')
+parser.add_argument('--pinning_conf', '-p', type=str, required=True, help='Pinning configuration', default='epdtdi105_neighboring')
+parser.add_argument('--num_runs', '-r', type=int, required=True, help='Number of runs to execute for each unique configuration', default=5)
+parser.add_argument('result_file', help='Result file')
+
+
+try:
+  args = parser.parse_args()
+except:
+  parser.print_help()
+  sys.exit(0)
+
 # config parameters
-pinning_conf = 'epdtdi105_neighboring'
-output_dir = "output"
+pinning_conf = args.pinning_conf
+output_dir = args.output_dir
 bytes_total =  [2**x for x in range(12,31)]
 num_queues = [1, 2, 4, 8, 16]
-num_runs = 5
+num_runs = args.num_runs
 
 child = pexpect.spawn('bash')
 
@@ -24,6 +40,7 @@ child.sendline('source daq-buildtools/dbt-setup-env.sh')
 child.expect("DBT setuptools loaded")
 child.sendline('dbt-setup-runtime-environment')
 child.expect('This script has been sourced successfully')
+child.sendline('export DUNEDAQ_OPMON_INTERVAL=1')
 
 
 # Build the project
@@ -77,6 +94,6 @@ for n in num_queues:
 
         print("Run completed")
 
-df.to_csv('results.csv', index=False)
+df.to_csv(args.result_file, index=False)
 print('All runs completed')
 
