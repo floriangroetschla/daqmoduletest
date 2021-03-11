@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os, string
+import time
 import argparse
 import sys
 from subprocess import Popen, PIPE
@@ -15,7 +16,8 @@ parser = argparse.ArgumentParser(description='Run storage tests for daqmoduletes
 #parser.add_argument('--num_queues', '-q', type=str, required=True, help='Number of consumer/producer pairs', default=1)
 parser.add_argument('--output_dir', '-o', type=str, required=True, help='Directory where consumers write temporary output files')
 parser.add_argument('--pinning_conf', '-p', type=str, required=False, help='Pinning configuration', default="no_pinning")
-parser.add_argument('--num_runs', '-r', type=int, required=True, help='Number of runs to execute for each unique configuration', default=5)
+parser.add_argument('--num_runs', '-r', type=int, required=False, help='Number of runs to execute for each unique configuration', default=1)
+parser.add_argument('--time_to_run', '-t', type=int, required=False, help='Time to run the application before stopping it (in seconds)', default=10)
 parser.add_argument('result_file', help='Result file')
 
 
@@ -31,6 +33,7 @@ output_dir = args.output_dir
 bytes_total =  [2**x for x in range(12,31)]
 num_queues = [1, 2, 4, 8, 16]
 num_runs = args.num_runs
+time_to_run = args.time_to_run
 
 child = pexpect.spawn('bash')
 
@@ -73,8 +76,7 @@ for n in num_queues:
                     sys.exit('Failed to set pinning')
 
             child.sendline('start')
-            for q in range(n):
-                child.expect('finished writing')
+            time.sleep(time_to_run)
             child.sendline('stop')
             child.expect('Command stop execution resulted with: 1 OK')
             child.sendline('\003')

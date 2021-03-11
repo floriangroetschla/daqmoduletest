@@ -42,6 +42,9 @@ namespace dunedaq {
             if (m_completed_work) {
                 std::chrono::duration<double> time_passed = std::chrono::duration_cast<std::chrono::duration<double>>(m_time_of_completion - m_time_of_start_work);
                 consumerInfo.throughput = static_cast<double>(m_bytes_received) / 1000000.0 / time_passed.count();
+            } else {
+                std::chrono::duration<double> time_passed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - m_time_of_start_work);
+                consumerInfo.throughput = static_cast<double>(m_bytes_received) / 1000000.0 / time_passed.count();
             }
             return consumerInfo;
         }
@@ -53,6 +56,7 @@ namespace dunedaq {
 
         void Consumer::do_start(const nlohmann::json& args) {
             m_conf = args.get<conf::Conf>();
+            m_time_of_start_work = std::chrono::steady_clock::now();
             m_start_lock.unlock();
             TLOG() << get_name() << " successfully started";
         }
@@ -73,9 +77,8 @@ namespace dunedaq {
                 throw FileError(ERS_HERE, get_name(), output_file);
                 return;
             }
-            m_time_of_start_work = std::chrono::steady_clock::now();
-            while (running_flag.load() && m_bytes_written < m_conf.bytes_to_send) {
-                std::vector<int> buffer(m_conf.message_size / sizeof(int));
+            std::vector<int> buffer(m_conf.message_size / sizeof(int));
+            while (running_flag.load()) {
                 try {
                     inputQueue->pop(buffer, std::chrono::milliseconds(1000));
                     m_bytes_received += m_conf.message_size;

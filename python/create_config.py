@@ -32,7 +32,7 @@ def generate(
     # Define modules and queues
     queue_bare_specs = []
     for i in range(QUEUE_PAIRS):
-        queue_bare_specs.append(app.QueueSpec(inst="queue_"+str(i), kind="FollySPSCQueue", capacity=1))
+        queue_bare_specs.append(app.QueueSpec(inst="queue_"+str(i), kind="FollySPSCQueue", capacity=1000))
 
     # Only needed to reproduce the same order as when using jsonnet
     queue_specs = app.QueueSpecs(sorted(queue_bare_specs, key=lambda x: x.inst))
@@ -55,7 +55,7 @@ def generate(
     )
 
     startcmd = mrccmd("start", "INITIAL", "RUNNING", [
-                (".*", daq_test_conf.Conf(bytes_to_send=BYTES_TO_SEND, message_size=BYTES_TO_SEND, output_dir=OUTPUT_DIR))
+                (".*", daq_test_conf.Conf(message_size=BYTES_TO_SEND, output_dir=OUTPUT_DIR))
             ])
 
     stopcmd = mrccmd("stop", "RUNNING", "INITIAL", [

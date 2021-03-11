@@ -9,8 +9,6 @@ local types = {
                       doc="A string field"),
 
     conf: s.record("Conf", [
-        s.field("bytes_to_send", self.size, 0,
-                doc="Number of bytes to send in total"),
         s.field("message_size", self.size, 4096,
                 doc="Size of the messages in bytes"),
         s.field("output_dir", self.cl, "output", doc="Output dir to write data to"),
