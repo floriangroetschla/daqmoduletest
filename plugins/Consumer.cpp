@@ -30,7 +30,7 @@ namespace dunedaq {
             thread_.start_working_thread(get_name());
         }
 
-        void Consumer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
+        consumerinfo::Info Consumer::collect_info() {
             consumerinfo::Info consumerInfo;
 
             consumerInfo.bytes_received = m_bytes_received.load();
@@ -43,11 +43,12 @@ namespace dunedaq {
                 std::chrono::duration<double> time_passed = std::chrono::duration_cast<std::chrono::duration<double>>(m_time_of_completion - m_time_of_start_work);
                 consumerInfo.throughput = static_cast<double>(m_bytes_received) / 1000000.0 / time_passed.count();
             }
-            ci.add(consumerInfo);
+            return consumerInfo;
+        }
 
-            nlohmann::json j;
-            consumerinfo::to_json(j, consumerInfo);
-            m_log_stream << j.dump() << std::endl;
+        void Consumer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
+            consumerinfo::Info consumerInfo = collect_info();
+            ci.add(consumerInfo);
         }
 
         void Consumer::do_start(const nlohmann::json& args) {
@@ -89,6 +90,13 @@ namespace dunedaq {
             m_output_stream.close();
             m_completed_work = true;
             remove(output_file.c_str());
+            consumerinfo::Info consumerInfo = collect_info();
+
+            nlohmann::json j;
+            consumerinfo::to_json(j, consumerInfo);
+            m_log_stream << j.dump() << std::endl;
+            m_log_stream.flush();
+            TLOG() << get_name() << " finished writing" << std::endl;
         }
     }
 }

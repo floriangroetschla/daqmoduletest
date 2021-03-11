@@ -32,6 +32,7 @@ namespace dunedaq {
     private:
         void do_start(const nlohmann::json& obj);
         void do_stop(const nlohmann::json& obj);
+        consumerinfo::Info collect_info();
 
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);

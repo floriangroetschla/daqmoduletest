@@ -40,7 +40,7 @@ child.sendline('source daq-buildtools/dbt-setup-env.sh')
 child.expect("DBT setuptools loaded")
 child.sendline('dbt-setup-runtime-environment')
 child.expect('This script has been sourced successfully')
-child.sendline('export DUNEDAQ_OPMON_INTERVAL=1')
+#child.sendline('export DUNEDAQ_OPMON_INTERVAL=1')
 
 
 # Build the project
@@ -68,10 +68,12 @@ for n in num_queues:
             child.sendline('init')
             child.expect('Command init execution resulted with: 1 OK')
             if (os.system("python3 sourcecode/daqmoduletest/python/balancer.py --process daq_application --pinfile pinnings.json") != 0):
+                print("Failed to set pinning")
                 sys.exit('Failed to set pinning')
 
             child.sendline('start')
-            child.expect('"completed": true,')
+            for q in range(n):
+                child.expect('finished writing')
             child.sendline('stop')
             child.expect('Command stop execution resulted with: 1 OK')
             child.sendline('\003')
@@ -82,7 +84,8 @@ for n in num_queues:
                 lines = file.readlines()
                 result = json.loads(lines[-1])
                 if not result['completed']:
-                    sys.exit('Run was not completed sucessfully')
+                    print("run was not completed successfully")
+                    sys.exit('Run was not completed successfully')
                 print(result)
                 result['n_queues'] = n
                 result['total_num_bytes'] = bytes
