@@ -76,12 +76,18 @@ def generate(
 
 # Generate a suitable pinning for epdtdi05
 def generate_pinfile(
-        QUEUE_PAIRS = 1
+        QUEUE_PAIRS = 1,
+        PINNING_CONF = 'epdtdi105_neighboring'
     ):
     pinnings = {}
-    for i in range(QUEUE_PAIRS):
-        pinnings['prod_'+str(i)] = [2*i+1]
-        pinnings['cons_'+str(i)] = [2*i+33]
+    if (PINNING_CONF == 'epdtdi105_neighboring'):
+        for i in range(QUEUE_PAIRS):
+                pinnings['prod_'+str(i)] = [32+i*2]
+                pinnings['cons_'+str(i)] = [33+i*2]
+    elif (PINNING_CONF == 'epdtdi105_same_core'):
+        for i in range(QUEUE_PAIRS):
+                pinnings['prod_'+str(i)] = [2*i+1]
+                pinnings['cons_'+str(i)] = [2*i+33]
 
     jstr = json.dumps(pinnings, indent=4)
     return jstr
@@ -95,8 +101,9 @@ if __name__ == '__main__':
     @click.option('-q', '--queue-pairs', default=1)
     @click.option('-b', '--bytes_to_send', default=4096)
     @click.option('-o', '--output_dir', default='output')
+    @click.option('-p', '--pinning_conf', default='epdtdi105_neighboring')
     @click.argument('json_file', type=click.Path(), default='app.json')
-    def cli(queue_pairs, bytes_to_send, output_dir, json_file):
+    def cli(queue_pairs, bytes_to_send, output_dir, pinning_conf, json_file):
         """
           JSON_FILE: Input raw data file.
           JSON_FILE: Output json configuration file.
@@ -110,7 +117,7 @@ if __name__ == '__main__':
                 ))
 
         with open('pinnings.json', 'w') as f:
-            f.write(generate_pinfile(QUEUE_PAIRS=queue_pairs))
+            f.write(generate_pinfile(QUEUE_PAIRS=queue_pairs, PINNING_CONF=pinning_conf))
 
         print(f"'{json_file}' generation completed.")
 

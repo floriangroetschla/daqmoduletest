@@ -2,17 +2,17 @@
 # coding: utf-8
 
 import os, string
+import sys
 from subprocess import Popen, PIPE
 import pexpect
 import json
 import pandas as pd
 
 # config parameters
+pinning_conf = 'epdtdi105_neighboring'
 output_dir = "output"
-#bytes_total =  [2**x for x in range(12,31)]
-bytes_total = [4096]
+bytes_total =  [2**x for x in range(12,31)]
 num_queues = [1, 2, 4, 8, 16]
-#num_queues = [1]
 num_runs = 5
 
 child = pexpect.spawn('bash')
@@ -38,7 +38,7 @@ for n in num_queues:
         # Generate configuration
         print('Generate config for ' + str(n) + ' queues and ' + str(bytes) + " bytes")
         bytes_per_queue = int(bytes / n)
-        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes_per_queue) + ' -o ' + str(output_dir))
+        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes_per_queue) + ' -o ' + str(output_dir) + ' -p ' + pinning_conf)
         child.expect('generation completed.')
 
         for i in range(num_runs):
@@ -48,7 +48,8 @@ for n in num_queues:
             child.expect('Available commands: | init | start | stop')
             child.sendline('init')
             child.expect('Command init execution resulted with: 1 OK')
-            os.system("python3 sourcecode/daqmoduletest/python/balancer.py --process daq_application --pinfile pinnings.json")
+            if (os.system("python3 sourcecode/daqmoduletest/python/balancer.py --process daq_application --pinfile pinnings.json") != 0):
+                sys.exit('Failed to set pinning')
 
             child.sendline('start')
             child.expect('"completed": true,')
@@ -62,13 +63,13 @@ for n in num_queues:
                 lines = file.readlines()
                 result = json.loads(lines[-1])
                 if not result['completed']:
-                    print('Run was not successfull')
-                    exit
+                    sys.exit('Run was not completed sucessfully')
                 print(result)
                 result['n_queues'] = n
                 result['total_num_bytes'] = bytes
                 result['run_number'] = i
                 result['consumer_number'] = j
+                result['pinning_conf'] = pinning_conf
                 df = df.append(result, ignore_index=True)
 
         print("Run completed")
