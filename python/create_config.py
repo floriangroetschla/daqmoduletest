@@ -105,7 +105,7 @@ if __name__ == '__main__':
     @click.option('-q', '--queue-pairs', default=1)
     @click.option('-b', '--bytes_to_send', default=4096)
     @click.option('-o', '--output_dir', default='output')
-    @click.option('-p', '--pinning_conf', default='epdtdi105_neighboring')
+    @click.option('-p', '--pinning_conf', default="no_pinning")
     @click.argument('json_file', type=click.Path(), default='app.json')
     def cli(queue_pairs, bytes_to_send, output_dir, pinning_conf, json_file):
         """
@@ -120,8 +120,9 @@ if __name__ == '__main__':
                     OUTPUT_DIR = output_dir
                 ))
 
-        with open('pinnings.json', 'w') as f:
-            f.write(generate_pinfile(QUEUE_PAIRS=queue_pairs, PINNING_CONF=pinning_conf))
+        if (pinning_conf != 'no_pinning'):
+            with open('pinnings.json', 'w') as f:
+                f.write(generate_pinfile(QUEUE_PAIRS=queue_pairs, PINNING_CONF=pinning_conf))
 
         print(f"'{json_file}' generation completed.")
 

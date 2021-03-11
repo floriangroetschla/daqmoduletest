@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Run storage tests for daqmoduletes
 #parser.add_argument('--bytes_total', '-b', type=str, required=True, help='Total bytes to write to disk', default=4096)
 #parser.add_argument('--num_queues', '-q', type=str, required=True, help='Number of consumer/producer pairs', default=1)
 parser.add_argument('--output_dir', '-o', type=str, required=True, help='Directory where consumers write temporary output files')
-parser.add_argument('--pinning_conf', '-p', type=str, required=True, help='Pinning configuration', default='epdtdi105_neighboring')
+parser.add_argument('--pinning_conf', '-p', type=str, required=False, help='Pinning configuration', default="no_pinning")
 parser.add_argument('--num_runs', '-r', type=int, required=True, help='Number of runs to execute for each unique configuration', default=5)
 parser.add_argument('result_file', help='Result file')
 
@@ -67,9 +67,10 @@ for n in num_queues:
             child.expect('Available commands: | init | start | stop')
             child.sendline('init')
             child.expect('Command init execution resulted with: 1 OK')
-            if (os.system("python3 sourcecode/daqmoduletest/python/balancer.py --process daq_application --pinfile pinnings.json") != 0):
-                print("Failed to set pinning")
-                sys.exit('Failed to set pinning')
+            if (args.pinning_conf != "no_pinning"):
+                if (os.system("python3 sourcecode/daqmoduletest/python/balancer.py --process daq_application --pinfile pinnings.json") != 0):
+                    print("Failed to set pinning")
+                    sys.exit('Failed to set pinning')
 
             child.sendline('start')
             for q in range(n):
