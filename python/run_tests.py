@@ -7,6 +7,7 @@ from subprocess import Popen, PIPE
 import pexpect
 import json
 import pandas as pd
+import subprocess
 
 # config parameters
 pinning_conf = 'epdtdi105_neighboring'
@@ -27,7 +28,8 @@ child.expect('This script has been sourced successfully')
 
 # Build the project
 print('Build project')
-
+commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd='sourcecode/daqmoduletest').decode('ascii').strip()
+print('Commit hash is: ' + commit_hash)
 child.sendline('dbt-build.sh --install')
 child.expect('Installation complete.')
 
@@ -70,6 +72,7 @@ for n in num_queues:
                 result['run_number'] = i
                 result['consumer_number'] = j
                 result['pinning_conf'] = pinning_conf
+                result['commit_hash'] = commit_hash
                 df = df.append(result, ignore_index=True)
 
         print("Run completed")
