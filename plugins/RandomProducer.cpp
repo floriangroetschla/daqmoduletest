@@ -57,7 +57,7 @@ namespace dunedaq {
                     buffer[i] = mt_rand();
                 }
                 try {
-                    outputQueue->push(buffer, std::chrono::milliseconds(1000));
+                    outputQueue->push(buffer, std::chrono::milliseconds(100));
                     m_bytes_sent += m_conf.message_size;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     std::ostringstream oss_warn;

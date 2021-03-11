@@ -62,6 +62,7 @@ namespace dunedaq {
         }
 
         void Consumer::do_stop(const nlohmann::json& /*args*/) {
+            TLOG() << "Stopping " << get_name() << std::endl;
             thread_.stop_working_thread();
             TLOG() << get_name() << " successfully stopped";
         }
@@ -80,10 +81,10 @@ namespace dunedaq {
             std::vector<int> buffer(m_conf.message_size / sizeof(int));
             while (running_flag.load()) {
                 try {
-                    inputQueue->pop(buffer, std::chrono::milliseconds(1000));
+                    inputQueue->pop(buffer, std::chrono::milliseconds(100));
                     m_bytes_received += m_conf.message_size;
                     m_output_stream.write((char*)buffer.data(), m_conf.message_size);
-                    //m_output_stream.flush();
+                    m_output_stream.flush();
                     m_bytes_written += m_conf.message_size;
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     continue;
