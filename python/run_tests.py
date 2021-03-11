@@ -59,8 +59,7 @@ for n in num_queues:
     for bytes in bytes_total:
         # Generate configuration
         print('Generate config for ' + str(n) + ' queues and ' + str(bytes) + " bytes")
-        bytes_per_queue = int(bytes / n)
-        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes_per_queue) + ' -o ' + str(output_dir) + ' -p ' + pinning_conf)
+        child.sendline('python3 sourcecode/daqmoduletest/python/create_config.py -q ' + str(n) + ' -b ' + str(bytes) + ' -o ' + str(output_dir) + ' -p ' + pinning_conf)
         child.expect('generation completed.')
 
         for i in range(num_runs):
