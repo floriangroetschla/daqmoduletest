@@ -56,7 +56,6 @@ namespace dunedaq {
 
         void Consumer::do_start(const nlohmann::json& args) {
             m_conf = args.get<conf::Conf>();
-            m_time_of_start_work = std::chrono::steady_clock::now();
             m_start_lock.unlock();
             TLOG() << get_name() << " successfully started";
         }
@@ -78,6 +77,7 @@ namespace dunedaq {
                 throw FileError(ERS_HERE, get_name(), output_file);
                 return;
             }
+            m_time_of_start_work = std::chrono::steady_clock::now();
             std::vector<int> buffer(m_conf.message_size / sizeof(int));
             while (running_flag.load()) {
                 try {
