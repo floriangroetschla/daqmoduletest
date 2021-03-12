@@ -51,8 +51,8 @@ namespace dunedaq {
 
         void RandomProducer::do_work(std::atomic<bool>& running_flag) {
             std::lock_guard<std::mutex> lock_guard(m_start_lock);
+            std::vector<int> buffer(m_conf.message_size / sizeof(int));
             while (running_flag.load()) {
-                std::vector<int> buffer(m_conf.message_size / sizeof(int));
                 for (uint i = 0; i < buffer.size(); ++i) {
                     buffer[i] = mt_rand();
                 }
