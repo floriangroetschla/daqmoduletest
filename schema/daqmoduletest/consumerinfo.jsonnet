@@ -15,6 +15,7 @@ local info = {
    info: s.record("Info", [
        s.field("class_name", self.cl, "consumerinfo", doc="Info class name"),
        s.field("timestamp", self.uint8, 0, doc="Timestamp"),
+       s.field("completed_measurement", self.boolean, false, doc="Completion status of the measurement"),
        s.field("completed", self.boolean, false, doc="Completion status of writes"),
        s.field("throughput", self.double8, 0, doc="Throughput"),
        s.field("message_size", self.uint8, 0, doc="Message size in bytes"),

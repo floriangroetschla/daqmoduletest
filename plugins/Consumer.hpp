@@ -32,6 +32,8 @@ namespace dunedaq {
     private:
         void do_start(const nlohmann::json& obj);
         void do_stop(const nlohmann::json& obj);
+        void do_start_measurement(const nlohmann::json& obj);
+        void do_stop_measurement(const nlohmann::json& obj);
         consumerinfo::Info collect_info();
 
         dunedaq::appfwk::ThreadHelper thread_;
@@ -42,12 +44,17 @@ namespace dunedaq {
 
         std::atomic<uint64_t> m_bytes_received{0};
         std::atomic<uint64_t> m_bytes_written{0};
+        std::atomic<uint64_t> m_measured_bytes_written{0};
+        std::atomic<bool> m_do_measurement{false};
         std::ofstream m_output_stream;
         std::string m_output_file;
         std::ofstream m_log_stream;
         std::chrono::steady_clock::time_point m_time_of_start_work;
         std::chrono::steady_clock::time_point m_time_of_completion;
+        std::chrono::steady_clock::time_point m_time_of_start_measurement;
+        std::chrono::steady_clock::time_point m_time_of_stop_measurement;
         std::atomic<bool> m_completed_work{false};
+        std::atomic<bool> m_completed_measurement{false};
         conf::Conf m_conf;
         std::mutex m_start_lock;
     };

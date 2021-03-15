@@ -62,13 +62,21 @@ def generate(
                 (".*", None),
             ])
 
+    start_measurement_cmd = mrccmd("start_measurement", "RUNNING", "MEASURING", [
+        (".*", None),
+    ])
+
+    stop_measurement_cmd = mrccmd("stop_measurement", "MEASURING", "RUNNING", [
+        (".*", None),
+    ])
+
 
     jstr = json.dumps(initcmd.pod(), indent=4, sort_keys=True)
     print(jstr)
 
 
     # Create a list of commands
-    cmd_seq = [initcmd, startcmd, stopcmd]
+    cmd_seq = [initcmd, startcmd, stopcmd, start_measurement_cmd, stop_measurement_cmd]
 
     # Print them as json (to be improved/moved out)
     jstr = json.dumps([c.pod() for c in cmd_seq], indent=4, sort_keys=True)
