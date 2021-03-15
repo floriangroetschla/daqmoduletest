@@ -84,10 +84,13 @@ for n in num_queues:
             time.sleep(time_to_run)
             child.sendline('stop_measurement')
             child.expect('Command stop_measurement execution resulted with: 1 OK')
+            # Cooldown to let consumers write results to file
+            time.sleep(time_for_warmup)
+
             # For big message sizes and queue numbers stopping can take very long
             #child.sendline('stop')
             #child.expect('Command stop execution resulted with: 1 OK')
-            child.sendline('\003')
+            child.sendcontrol('c')
 
             print('Get results')
             for j in range(n):
@@ -105,6 +108,8 @@ for n in num_queues:
                 result['pinning_conf'] = pinning_conf
                 result['commit_hash'] = commit_hash
                 df = df.append(result, ignore_index=True)
+                os.remove('runs/cons_' + str(j) + '_log.jsonl')
+                os.remove(output_dir + '/output_cons_' + str(j))
 
         print("Run completed")
 
