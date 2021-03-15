@@ -22,6 +22,9 @@ namespace dunedaq {
         void Consumer::init(const nlohmann::json& init_data) {
             std::string log_file = "runs/" + get_name() + "_log.jsonl";
             m_log_stream.open(log_file);
+            if (!m_log_stream.is_open()) {
+                throw FileError(ERS_HERE, get_name(), log_file);
+            }
             try {
                 auto qi = appfwk::queue_index(init_data, {"inputQueue"});
                 inputQueue.reset(new source_t(qi["inputQueue"].inst));
@@ -94,7 +97,6 @@ namespace dunedaq {
             m_output_stream.open(output_file);
             if (!m_output_stream.is_open()) {
                 throw FileError(ERS_HERE, get_name(), output_file);
-                return;
             }
             m_time_of_start_work = std::chrono::steady_clock::now();
             std::vector<int> buffer(m_conf.message_size / sizeof(int));
