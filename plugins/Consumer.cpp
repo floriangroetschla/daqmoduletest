@@ -52,6 +52,12 @@ namespace dunedaq {
         void Consumer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
             consumerinfo::Info consumerInfo = collect_info();
             ci.add(consumerInfo);
+
+            // Also write info to file
+            nlohmann::json j;
+            consumerinfo::to_json(j, consumerInfo);
+            m_log_stream << j.dump() << std::endl;
+            m_log_stream.flush();
         }
 
         void Consumer::do_start(const nlohmann::json& args) {

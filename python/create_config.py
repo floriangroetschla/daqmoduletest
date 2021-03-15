@@ -32,7 +32,7 @@ def generate(
     # Define modules and queues
     queue_bare_specs = []
     for i in range(QUEUE_PAIRS):
-        queue_bare_specs.append(app.QueueSpec(inst="queue_"+str(i), kind="FollySPSCQueue", capacity=1000))
+        queue_bare_specs.append(app.QueueSpec(inst="queue_"+str(i), kind="FollySPSCQueue", capacity=100))
 
     # Only needed to reproduce the same order as when using jsonnet
     queue_specs = app.QueueSpecs(sorted(queue_bare_specs, key=lambda x: x.inst))
