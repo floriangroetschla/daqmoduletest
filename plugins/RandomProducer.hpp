@@ -10,6 +10,7 @@
 #include "appfwk/ThreadHelper.hpp"
 #include "appfwk/app/Nljs.hpp"
 #include "daqmoduletest/conf/Structs.hpp"
+#include <boost/align/aligned_allocator.hpp>
 
 #include <atomic>
 #include <random>
@@ -36,7 +37,7 @@ namespace dunedaq {
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);
 
-        using sink_t = dunedaq::appfwk::DAQSink<std::vector<int>>;
+        using sink_t = dunedaq::appfwk::DAQSink<std::vector<int, boost::alignment::aligned_allocator<int, 512>>>;
         std::unique_ptr<sink_t> outputQueue;
 
         std::mt19937 mt_rand;

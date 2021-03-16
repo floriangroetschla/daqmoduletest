@@ -6,6 +6,7 @@
 #include "daqmoduletest/conf/Nljs.hpp"
 #include "Consumer.hpp"
 #include "Issues.h"
+#include <boost/align/aligned_allocator.hpp>
 
 #include "appfwk/DAQModuleHelper.hpp"
 #include "logging/Logging.hpp"
@@ -94,12 +95,14 @@ namespace dunedaq {
             if (remove(output_file.c_str()) == 0) {
                 TLOG() << "Removed existing output file from previous run" << std::endl;
             }
-            m_output_stream.open(output_file);
-            if (!m_output_stream.is_open()) {
+            fd = open(output_file.c_str(), O_CREAT | O_RDWR | O_DIRECT);
+            if (fd == -1) {
                 throw FileError(ERS_HERE, get_name(), output_file);
             }
+
+            std::vector<int, boost::alignment::aligned_allocator<int, 512>> buffer(m_conf.message_size / sizeof(int));
+
             m_time_of_start_work = std::chrono::steady_clock::now();
-            std::vector<int> buffer(m_conf.message_size / sizeof(int));
             bool started_measuring = false;
             while (running_flag.load()) {
                 try {
@@ -109,8 +112,9 @@ namespace dunedaq {
                     }
                     inputQueue->pop(buffer, std::chrono::milliseconds(100));
                     m_bytes_received += m_conf.message_size;
-                    m_output_stream.write((char*)buffer.data(), m_conf.message_size);
-                    m_output_stream.flush();
+                    if (write(fd, (char*)buffer.data(), m_conf.message_size) == -1) {
+                        TLOG() << "Could not write to disk" << std::endl;
+                    }
                     m_bytes_written += m_conf.message_size;
                     if (started_measuring) {
                         m_measured_bytes_written += m_conf.message_size;
@@ -133,7 +137,7 @@ namespace dunedaq {
                 }
             }
             m_time_of_completion = std::chrono::steady_clock::now();
-            m_output_stream.close();
+            //m_output_stream.close();
             m_completed_work = true;
             remove(output_file.c_str());
             /*consumerinfo::Info consumerInfo = collect_info();

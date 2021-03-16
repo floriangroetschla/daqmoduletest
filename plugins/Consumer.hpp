@@ -9,6 +9,7 @@
 #include "appfwk/DAQSource.hpp"
 #include "appfwk/ThreadHelper.hpp"
 #include "daqmoduletest/conf/Structs.hpp"
+#include <boost/align/aligned_allocator.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -39,14 +40,15 @@ namespace dunedaq {
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);
 
-        using source_t = dunedaq::appfwk::DAQSource<std::vector<int>>;
+        using source_t = dunedaq::appfwk::DAQSource<std::vector<int, boost::alignment::aligned_allocator<int, 512>>>;
         std::unique_ptr<source_t> inputQueue;
 
         std::atomic<uint64_t> m_bytes_received{0};
         std::atomic<uint64_t> m_bytes_written{0};
         std::atomic<uint64_t> m_measured_bytes_written{0};
         std::atomic<bool> m_do_measurement{false};
-        std::ofstream m_output_stream;
+        //std::ofstream m_output_stream;
+        int fd;
         std::string m_output_file;
         std::ofstream m_log_stream;
         std::chrono::steady_clock::time_point m_time_of_start_work;
