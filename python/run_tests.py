@@ -18,7 +18,8 @@ parser.add_argument('--output_dir', '-o', type=str, required=True, help='Directo
 parser.add_argument('--pinning_conf', '-p', type=str, required=False, help='Pinning configuration', default="no_pinning")
 parser.add_argument('--num_runs', '-r', type=int, required=False, help='Number of runs to execute for each unique configuration', default=1)
 parser.add_argument('--time_to_run', '-t', type=int, required=False, help='Time to run the application before stopping it (in seconds)', default=40)
-parser.add_argument('--time_for_warmup', '-w', type=int, required=False, help='Time to write before starting the real measurement (in seconds)', default=30)
+parser.add_argument('--warmup_time', '-w', type=int, required=False, help='Time to write before starting the real measurement (in seconds)', default=30)
+parser.add_argument('--cooldown_time', '-c', type=int, required=False, help='Time for cooldown between runs (no write activity)', default=10)
 parser.add_argument('result_file', help='Result file')
 
 
@@ -34,8 +35,9 @@ output_dir = args.output_dir
 bytes_total =  [2**x for x in range(12,31)]
 num_queues = [1, 2, 4]
 num_runs = args.num_runs
-time_for_warmup = args.time_for_warmup
+time_for_warmup = args.warmup_time
 time_to_run = args.time_to_run
+cooldown_time = args.cooldown_time
 
 child = pexpect.spawn('bash')
 
@@ -107,6 +109,10 @@ for n in num_queues:
                             result['consumer_number'] = consumer
                             result['pinning_conf'] = pinning_conf
                             result['commit_hash'] = commit_hash
+                            result['warmup_time'] = time_for_warmup
+                            result['time_to_run'] = time_to_run
+                            result['cooldown_time'] = cooldown_time
+                            result['output_dir'] = output_dir
                             df = df.append(result, ignore_index=True)
                             os.remove('runs/cons_' + str(consumer) + '_log.jsonl')
                             os.remove(output_dir + '/output_cons_' + str(consumer))
@@ -119,7 +125,7 @@ for n in num_queues:
 
             child.expect('Command stop execution resulted with: 1 OK')
             child.sendcontrol('c')
-            time.sleep(10)
+            time.sleep(cooldown_time)
 
         print("Run completed")
 

@@ -150,6 +150,7 @@ namespace dunedaq {
 
             m_time_of_completion = std::chrono::steady_clock::now();
             //m_output_stream.close();
+            close(fd);
             m_completed_work = true;
             //remove(output_file.c_str());
 
