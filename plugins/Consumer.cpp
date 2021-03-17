@@ -114,11 +114,13 @@ namespace dunedaq {
                     m_bytes_received += m_conf.message_size;
                     if (write(fd, (char*)buffer.data(), m_conf.message_size) == -1) {
                         TLOG() << "Could not write to disk" << std::endl;
+                    } else {
+                        m_bytes_written += m_conf.message_size;
                     }
-                    m_bytes_written += m_conf.message_size;
                     if (started_measuring) {
                         m_measured_bytes_written += m_conf.message_size;
                         if (!m_do_measurement.load()) {
+                            // A measurement finished
                             m_time_of_stop_measurement = std::chrono::steady_clock::now();
                             started_measuring = false;
                             m_completed_measurement = true;
@@ -129,23 +131,28 @@ namespace dunedaq {
                             nlohmann::json j;
                             consumerinfo::to_json(j, consumerInfo);
                             m_log_stream << j.dump() << std::endl;
-                            m_log_stream.flush();
                         }
                     }
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
                     continue;
                 }
             }
+
+            if (started_measuring && !m_do_measurement) {
+                m_time_of_stop_measurement = std::chrono::steady_clock::now();
+                m_completed_measurement = true;
+
+                consumerinfo::Info consumerInfo = collect_info();
+                nlohmann::json j;
+                consumerinfo::to_json(j, consumerInfo);
+                m_log_stream << j.dump() << std::endl;
+            }
+
             m_time_of_completion = std::chrono::steady_clock::now();
             //m_output_stream.close();
             m_completed_work = true;
-            remove(output_file.c_str());
-            /*consumerinfo::Info consumerInfo = collect_info();
+            //remove(output_file.c_str());
 
-            nlohmann::json j;
-            consumerinfo::to_json(j, consumerInfo);
-            m_log_stream << j.dump() << std::endl;
-            m_log_stream.flush();*/
             TLOG() << get_name() << " finished writing" << std::endl;
         }
     }
