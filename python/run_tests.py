@@ -53,7 +53,7 @@ child.expect('This script has been sourced successfully')
 # Build the project
 print('Build project')
 commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd='sourcecode/daqmoduletest').decode('ascii').strip()
-print('Commit hash is: ' + commit_hash)
+print('Commit hash: ' + commit_hash)
 child.sendline('dbt-build.sh --install')
 child.expect('Installation complete.')
 
@@ -68,7 +68,7 @@ for n in num_queues:
 
         for i in range(num_runs):
             # Run the program
-            print('Run program')
+            print('Run daq_application')
             child.sendline('daq_application -n hallo -c stdin://./app.json')
             child.expect('Available commands: | init | start | stop')
             child.sendline('init')
@@ -81,9 +81,13 @@ for n in num_queues:
             child.sendline('start')
             child.expect('Command start execution resulted with: 1 OK')
             time.sleep(time_for_warmup)
+
+            print('Start measurement')
             child.sendline('start_measurement')
             child.expect('Command start_measurement execution resulted with: 1 OK')
             time.sleep(time_to_run)
+
+            print('Stop measurement')
             child.sendline('stop_measurement')
             child.expect('Command stop_measurement execution resulted with: 1 OK')
 
@@ -125,6 +129,9 @@ for n in num_queues:
 
             child.expect('Command stop execution resulted with: 1 OK')
             child.sendcontrol('c')
+            child.expect('(dbt-pyvenv)')
+
+            print('Wait for cooldown')
             time.sleep(cooldown_time)
 
         print("Run completed")
