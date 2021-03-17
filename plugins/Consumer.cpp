@@ -100,7 +100,7 @@ namespace dunedaq {
                 throw FileError(ERS_HERE, get_name(), output_file);
             }
 
-            std::vector<int, boost::alignment::aligned_allocator<int, 512>> buffer(m_conf.message_size / sizeof(int));
+            std::vector<int, boost::alignment::aligned_allocator<int, 4096>> buffer(m_conf.message_size / sizeof(int));
 
             m_time_of_start_work = std::chrono::steady_clock::now();
             bool started_measuring = false;

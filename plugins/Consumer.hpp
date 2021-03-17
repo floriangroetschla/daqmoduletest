@@ -40,7 +40,7 @@ namespace dunedaq {
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);
 
-        using source_t = dunedaq::appfwk::DAQSource<std::vector<int, boost::alignment::aligned_allocator<int, 512>>>;
+        using source_t = dunedaq::appfwk::DAQSource<std::vector<int, boost::alignment::aligned_allocator<int, 4096>>>;
         std::unique_ptr<source_t> inputQueue;
 
         std::atomic<uint64_t> m_bytes_received{0};
