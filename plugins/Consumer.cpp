@@ -105,7 +105,7 @@ namespace dunedaq {
 
             boost::iostreams::file_descriptor_sink io_sink(fd, boost::iostreams::file_descriptor_flags::close_handle);
 
-            boost::iostreams::stream<boost::iostreams::file_descriptor_sink, std::char_traits<boost::iostreams::file_descriptor_sink::char_type>, boost::alignment::aligned_allocator<boost::iostreams::file_descriptor_sink::char_type, 4096>> output_stream(io_sink);
+            boost::iostreams::stream<boost::iostreams::file_descriptor_sink, std::char_traits<boost::iostreams::file_descriptor_sink::char_type>, boost::alignment::aligned_allocator<boost::iostreams::file_descriptor_sink::char_type, 4096>> output_stream(io_sink, 8388608);
             if (!output_stream.is_open()) {
                 TLOG() << "Could not open output stream" << std::endl;
             } else {
