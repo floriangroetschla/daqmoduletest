@@ -7,6 +7,9 @@
 #include "Consumer.hpp"
 #include "Issues.h"
 #include <boost/align/aligned_allocator.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
 
 #include "appfwk/DAQModuleHelper.hpp"
 #include "logging/Logging.hpp"
@@ -100,6 +103,13 @@ namespace dunedaq {
                 throw FileError(ERS_HERE, get_name(), output_file);
             }
 
+            boost::iostreams::stream<boost::iostreams::file_descriptor_sink, std::char_traits<boost::iostreams::file_descriptor_sink::char_type>, boost::alignment::aligned_allocator<boost::iostreams::file_descriptor_sink::char_type, 4096>> output_stream(fd, boost::iostreams::file_descriptor_flags::close_handle);
+            if (!output_stream.is_open()) {
+                TLOG() << "Could not open output stream" << std::endl;
+            } else {
+                TLOG() << "Successfully opened stream" << std::endl;
+            }
+
             std::vector<int, boost::alignment::aligned_allocator<int, 4096>> buffer(m_conf.message_size / sizeof(int));
 
             m_time_of_start_work = std::chrono::steady_clock::now();
@@ -112,11 +122,8 @@ namespace dunedaq {
                     }
                     inputQueue->pop(buffer, std::chrono::milliseconds(100));
                     m_bytes_received += m_conf.message_size;
-                    if (write(fd, (char*)buffer.data(), m_conf.message_size) == -1) {
-                        TLOG() << "Could not write to disk" << std::endl;
-                    } else {
-                        m_bytes_written += m_conf.message_size;
-                    }
+                    output_stream.write((char*)buffer.data(), m_conf.message_size);
+                    m_bytes_written += m_conf.message_size;
                     if (started_measuring) {
                         m_measured_bytes_written += m_conf.message_size;
                         if (!m_do_measurement.load()) {
@@ -149,10 +156,7 @@ namespace dunedaq {
             }
 
             m_time_of_completion = std::chrono::steady_clock::now();
-            //m_output_stream.close();
-            close(fd);
             m_completed_work = true;
-            //remove(output_file.c_str());
 
             TLOG() << get_name() << " finished writing" << std::endl;
         }
