@@ -124,8 +124,11 @@ namespace dunedaq {
                     }
                     inputQueue->pop(buffer, std::chrono::milliseconds(100));
                     m_bytes_received += m_conf.message_size;
-                    output_stream.write((char*)buffer.data(), m_conf.message_size);
-                    m_bytes_written += m_conf.message_size;
+                    if (!output_stream.write((char*)buffer.data(), m_conf.message_size)) {
+                        TLOG() << "Write was not successful" << std::endl;
+                    } else {
+                        m_bytes_written += m_conf.message_size;
+                    }
                     if (started_measuring) {
                         m_measured_bytes_written += m_conf.message_size;
                         if (!m_do_measurement.load()) {
