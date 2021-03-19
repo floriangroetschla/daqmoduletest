@@ -37,7 +37,7 @@ namespace dunedaq {
         dunedaq::appfwk::ThreadHelper thread_;
         void do_work(std::atomic<bool>&);
 
-        using sink_t = dunedaq::appfwk::DAQSink<std::vector<int, boost::alignment::aligned_allocator<int, 4096>>>;
+        using sink_t = dunedaq::appfwk::DAQSink<std::vector<int>>;
         std::unique_ptr<sink_t> outputQueue;
 
         std::mt19937 mt_rand;
