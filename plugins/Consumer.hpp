@@ -46,6 +46,7 @@ namespace dunedaq {
         std::atomic<uint64_t> m_bytes_received{0};
         std::atomic<uint64_t> m_bytes_written{0};
         std::atomic<uint64_t> m_measured_bytes_written{0};
+        std::atomic<uint64_t> m_bytes_since_last_info{0};
         std::atomic<bool> m_do_measurement{false};
         //std::ofstream m_output_stream;
         int fd;
@@ -55,6 +56,7 @@ namespace dunedaq {
         std::chrono::steady_clock::time_point m_time_of_completion;
         std::chrono::steady_clock::time_point m_time_of_start_measurement;
         std::chrono::steady_clock::time_point m_time_of_stop_measurement;
+        std::chrono::steady_clock::time_point m_time_of_last_info;
         std::atomic<bool> m_completed_work{false};
         std::atomic<bool> m_completed_measurement{false};
         conf::Conf m_conf;

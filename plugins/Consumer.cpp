@@ -45,13 +45,13 @@ namespace dunedaq {
             consumerInfo.completed_measurement = m_completed_measurement.load();
             consumerInfo.message_size = m_conf.message_size;
             consumerInfo.timestamp = std::time(0);
-            consumerInfo.throughput = 0.0;
+            std::chrono::duration<double> time_passed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - m_time_of_last_info);
+            consumerInfo.throughput = static_cast<double>(m_bytes_since_last_info) / (1 << 20) / time_passed.count();
             if (m_completed_measurement) {
                 std::chrono::duration<double> time_passed = std::chrono::duration_cast<std::chrono::duration<double>>(m_time_of_stop_measurement - m_time_of_start_measurement);
-                consumerInfo.throughput = static_cast<double>(m_measured_bytes_written) / 1000000.0 / time_passed.count();
+                consumerInfo.throughput_from_last_measurement = static_cast<double>(m_measured_bytes_written) / (1 << 20) / time_passed.count();
             } else {
-                std::chrono::duration<double> time_passed = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - m_time_of_start_work);
-                consumerInfo.throughput = static_cast<double>(m_bytes_received) / 1000000.0 / time_passed.count();
+                consumerInfo.throughput_from_last_measurement = 0;
             }
             return consumerInfo;
         }
@@ -59,12 +59,8 @@ namespace dunedaq {
         void Consumer::get_info(opmonlib::InfoCollector& ci, int /*level*/) {
             consumerinfo::Info consumerInfo = collect_info();
             ci.add(consumerInfo);
-
-            // Also write info to file
-            /*nlohmann::json j;
-            consumerinfo::to_json(j, consumerInfo);
-            m_log_stream << j.dump() << std::endl;
-            m_log_stream.flush();*/
+            m_time_of_last_info = std::chrono::steady_clock::now();
+            m_bytes_since_last_info = 0;
         }
 
         void Consumer::do_start(const nlohmann::json& args) {
@@ -103,6 +99,7 @@ namespace dunedaq {
             std::vector<int, boost::alignment::aligned_allocator<int, 4096>> buffer(m_conf.message_size / sizeof(int));
 
             m_time_of_start_work = std::chrono::steady_clock::now();
+            m_time_of_last_info = std::chrono::steady_clock::now();
             bool started_measuring = false;
             while (running_flag.load()) {
                 try {
@@ -112,25 +109,27 @@ namespace dunedaq {
                     }
                     inputQueue->pop(buffer, std::chrono::milliseconds(100));
                     m_bytes_received += m_conf.message_size;
-                    if (write(fd, (char*)buffer.data(), m_conf.message_size) == -1) {
+                    int write_result = write(fd, (char*)buffer.data(), m_conf.message_size);
+                    if (write_result == -1) {
                         TLOG() << "Could not write to disk" << std::endl;
                     } else {
                         m_bytes_written += m_conf.message_size;
-                    }
-                    if (started_measuring) {
-                        m_measured_bytes_written += m_conf.message_size;
-                        if (!m_do_measurement.load()) {
-                            // A measurement finished
-                            m_time_of_stop_measurement = std::chrono::steady_clock::now();
-                            started_measuring = false;
-                            m_completed_measurement = true;
+                        m_bytes_since_last_info += m_conf.message_size;
+                        if (started_measuring) {
+                            m_measured_bytes_written += m_conf.message_size;
+                            if (!m_do_measurement.load()) {
+                                // A measurement finished
+                                m_time_of_stop_measurement = std::chrono::steady_clock::now();
+                                started_measuring = false;
+                                m_completed_measurement = true;
 
-                            // Write result to file
-                            consumerinfo::Info consumerInfo = collect_info();
+                                // Write result to file
+                                consumerinfo::Info consumerInfo = collect_info();
 
-                            nlohmann::json j;
-                            consumerinfo::to_json(j, consumerInfo);
-                            m_log_stream << j.dump() << std::endl;
+                                nlohmann::json j;
+                                consumerinfo::to_json(j, consumerInfo);
+                                m_log_stream << j.dump() << std::endl;
+                            }
                         }
                     }
                 } catch (const dunedaq::appfwk::QueueTimeoutExpired& excpt) {
