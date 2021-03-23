@@ -18,6 +18,7 @@ local info = {
        s.field("completed_measurement", self.boolean, false, doc="Completion status of the measurement"),
        s.field("completed", self.boolean, false, doc="Completion status of writes"),
        s.field("throughput", self.double8, 0, doc="Throughput"),
+       s.field("throughput_from_last_measurement", self.double8, 0, doc="Throughput from last measurement"),
        s.field("message_size", self.uint8, 0, doc="Message size in bytes"),
        s.field("bytes_received", self.uint8, 0, doc="Total number of bytes received from the queue"),
        s.field("bytes_written", self.uint8, 0, doc="Total number of bytes written to disk")
